@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MyDrawVector.Core/MyDrawVector.Core.csproj" />
+    <Project Path="src/MyDrawVector/MyDrawVector.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MyDrawVector.Core.Tests/MyDrawVector.Core.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="FileMenu.Title" xml:space="preserve"><value>檔案</value></data>
+  <data name="NewMenuItem.Text" xml:space="preserve"><value>新增</value></data>
+  <data name="OpenMenuItem.Text" xml:space="preserve"><value>開啟</value></data>
+  <data name="RecentFilesMenu.Text" xml:space="preserve"><value>最近開啟</value></data>
+  <data name="SaveMenuItem.Text" xml:space="preserve"><value>儲存</value></data>
+  <data name="SaveAsMenuItem.Text" xml:space="preserve"><value>另存</value></data>
+  <data name="ExportPngMenu.Text" xml:space="preserve"><value>匯出 PNG</value></data>
+  <data name="EditMenu.Title" xml:space="preserve"><value>編輯</value></data>
+  <data name="UndoMenuItem.Text" xml:space="preserve"><value>復原</value></data>
+  <data name="RedoMenuItem.Text" xml:space="preserve"><value>重做</value></data>
+  <data name="UndoButton.ToolTipService.ToolTip" xml:space="preserve"><value>復原 (Ctrl+Z)</value></data>
+  <data name="UndoButton.AutomationProperties.Name" xml:space="preserve"><value>復原</value></data>
+  <data name="RedoButton.ToolTipService.ToolTip" xml:space="preserve"><value>重做 (Ctrl+Y)</value></data>
+  <data name="RedoButton.AutomationProperties.Name" xml:space="preserve"><value>重做</value></data>
+  <data name="CutMenuItem.Text" xml:space="preserve"><value>剪下</value></data>
+  <data name="CopyMenuItem.Text" xml:space="preserve"><value>複製</value></data>
+  <data name="PasteMenuItem.Text" xml:space="preserve"><value>貼上</value></data>
+  <data name="DuplicateMenuItem.Text" xml:space="preserve"><value>再製</value></data>
+  <data name="DeleteMenuItem.Text" xml:space="preserve"><value>刪除</value></data>
+  <data name="SelectAllMenuItem.Text" xml:space="preserve"><value>全選</value></data>
+  <data name="SettingsMenu.Title" xml:space="preserve"><value>設定</value></data>
+  <data name="HelpMenu.Title" xml:space="preserve"><value>說明</value></data>
+  <data name="ShortcutsMenuItem.Text" xml:space="preserve"><value>快捷鍵一覽</value></data>
+  <data name="PreferencesMenuItem.Text" xml:space="preserve"><value>偏好設定</value></data>
+  <data name="AboutMenuItem.Text" xml:space="preserve"><value>關於 MyDrawVector</value></data>
+  <data name="SelectToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>選取 (V)</value></data>
+  <data name="SelectToolButton.AutomationProperties.Name" xml:space="preserve"><value>選取工具</value></data>
+  <data name="RectangleToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>矩形 (R)</value></data>
+  <data name="RectangleToolButton.AutomationProperties.Name" xml:space="preserve"><value>矩形工具</value></data>
+  <data name="EllipseToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>橢圓 (E)</value></data>
+  <data name="EllipseToolButton.AutomationProperties.Name" xml:space="preserve"><value>橢圓工具</value></data>
+  <data name="LineToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>直線 (L)</value></data>
+  <data name="LineToolButton.AutomationProperties.Name" xml:space="preserve"><value>直線工具</value></data>
+  <data name="TextToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>文字 (T)</value></data>
+  <data name="TextToolButton.AutomationProperties.Name" xml:space="preserve"><value>文字工具</value></data>
+  <data name="ImageToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>插入圖片 (I)</value></data>
+  <data name="ImageToolButton.AutomationProperties.Name" xml:space="preserve"><value>插入圖片</value></data>
+  <data name="PencilToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>鉛筆 (P)</value></data>
+  <data name="PencilToolButton.AutomationProperties.Name" xml:space="preserve"><value>鉛筆工具</value></data>
+  <data name="PanToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>平移 (H)</value></data>
+  <data name="PanToolButton.AutomationProperties.Name" xml:space="preserve"><value>平移工具</value></data>
+  <data name="MoreShapesButton.ToolTipService.ToolTip" xml:space="preserve"><value>更多圖形</value></data>
+  <data name="MoreShapesButton.AutomationProperties.Name" xml:space="preserve"><value>更多圖形</value></data>
+  <data name="RoundedRectangleToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>圓角矩形</value></data>
+  <data name="RoundedRectangleToolButton.AutomationProperties.Name" xml:space="preserve"><value>圓角矩形工具</value></data>
+  <data name="ArrowToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>箭頭</value></data>
+  <data name="ArrowToolButton.AutomationProperties.Name" xml:space="preserve"><value>箭頭工具</value></data>
+  <data name="TriangleToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>三角形</value></data>
+  <data name="TriangleToolButton.AutomationProperties.Name" xml:space="preserve"><value>三角形工具</value></data>
+  <data name="DiamondToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>菱形</value></data>
+  <data name="DiamondToolButton.AutomationProperties.Name" xml:space="preserve"><value>菱形工具</value></data>
+  <data name="PentagonToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>五邊形</value></data>
+  <data name="PentagonToolButton.AutomationProperties.Name" xml:space="preserve"><value>五邊形工具</value></data>
+  <data name="HexagonToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>六邊形</value></data>
+  <data name="HexagonToolButton.AutomationProperties.Name" xml:space="preserve"><value>六邊形工具</value></data>
+  <data name="StarToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>星形</value></data>
+  <data name="StarToolButton.AutomationProperties.Name" xml:space="preserve"><value>星形工具</value></data>
+  <data name="SpeechBubbleToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>對話框</value></data>
+  <data name="SpeechBubbleToolButton.AutomationProperties.Name" xml:space="preserve"><value>對話框工具</value></data>
+  <data name="PreferencesThemeHeader" xml:space="preserve"><value>顯示模式</value></data>
+  <data name="ThemeSystem" xml:space="preserve"><value>跟隨系統</value></data>
+  <data name="ThemeLight" xml:space="preserve"><value>淺色</value></data>
+  <data name="ThemeDark" xml:space="preserve"><value>深色</value></data>
+  <data name="PreferencesThemeColorHeader" xml:space="preserve"><value>主題顏色</value></data>
+  <data name="ThemeColorClassicBlue" xml:space="preserve"><value>經典藍</value></data>
+  <data name="ThemeColorSkyBlue" xml:space="preserve"><value>天空藍</value></data>
+  <data name="ThemeColorTeal" xml:space="preserve"><value>青綠</value></data>
+  <data name="ThemeColorForestGreen" xml:space="preserve"><value>森林綠</value></data>
+  <data name="ThemeColorEyeCareYellow" xml:space="preserve"><value>護眼黃</value></data>
+  <data name="ThemeColorVividOrange" xml:space="preserve"><value>活力橙</value></data>
+  <data name="ThemeColorCoralRed" xml:space="preserve"><value>珊瑚紅</value></data>
+  <data name="ThemeColorTwilightPurple" xml:space="preserve"><value>暮色紫</value></data>
+  <data name="ThemeColorRosePink" xml:space="preserve"><value>玫瑰粉</value></data>
+  <data name="ThemeColorNeutralGray" xml:space="preserve"><value>中性灰</value></data>
+  <data name="PresetFillColorsLabel.Text" xml:space="preserve"><value>預設顏色</value></data>
+  <data name="PresetStrokeColorsLabel.Text" xml:space="preserve"><value>預設顏色</value></data>
+  <data name="CloseColorFlyout.ToolTipService.ToolTip" xml:space="preserve"><value>關閉</value></data>
+  <data name="CloseColorFlyout.AutomationProperties.Name" xml:space="preserve"><value>關閉選色視窗</value></data>
+  <data name="ShapeFillToggle.Content" xml:space="preserve"><value>啟用填色</value></data>
+  <data name="ShapeStrokeToggle.Content" xml:space="preserve"><value>啟用邊框</value></data>
+  <data name="PresetColorBlack" xml:space="preserve"><value>黑色</value></data>
+  <data name="PresetColorSlate" xml:space="preserve"><value>石板灰</value></data>
+  <data name="PresetColorGray" xml:space="preserve"><value>灰色</value></data>
+  <data name="PresetColorLightGray" xml:space="preserve"><value>淺灰色</value></data>
+  <data name="PresetColorWhite" xml:space="preserve"><value>白色</value></data>
+  <data name="PresetColorRed" xml:space="preserve"><value>紅色</value></data>
+  <data name="PresetColorOrange" xml:space="preserve"><value>橙色</value></data>
+  <data name="PresetColorAmber" xml:space="preserve"><value>琥珀色</value></data>
+  <data name="PresetColorYellow" xml:space="preserve"><value>黃色</value></data>
+  <data name="PresetColorLime" xml:space="preserve"><value>萊姆綠</value></data>
+  <data name="PresetColorGreen" xml:space="preserve"><value>綠色</value></data>
+  <data name="PresetColorTeal" xml:space="preserve"><value>藍綠色</value></data>
+  <data name="PresetColorCyan" xml:space="preserve"><value>青色</value></data>
+  <data name="PresetColorSky" xml:space="preserve"><value>天空藍</value></data>
+  <data name="PresetColorBlue" xml:space="preserve"><value>藍色</value></data>
+  <data name="PresetColorIndigo" xml:space="preserve"><value>靛藍色</value></data>
+  <data name="PresetColorViolet" xml:space="preserve"><value>紫羅蘭色</value></data>
+  <data name="PresetColorPurple" xml:space="preserve"><value>紫色</value></data>
+  <data name="PresetColorPink" xml:space="preserve"><value>粉紅色</value></data>
+  <data name="PresetColorBrown" xml:space="preserve"><value>棕色</value></data>
+  <data name="CanvasSectionHeader.Text" xml:space="preserve"><value>畫布</value></data>
+  <data name="ShowGridToggle.Header" xml:space="preserve"><value>顯示格線</value></data>
+  <data name="ShowGridToggle.OnContent" xml:space="preserve"><value>顯示格線</value></data>
+  <data name="ShowGridToggle.OffContent" xml:space="preserve"><value>隱藏格線</value></data>
+  <data name="SnapToGridToggle.Header" xml:space="preserve"><value>吸附至格線</value></data>
+  <data name="SnapToGridToggle.OnContent" xml:space="preserve"><value>開啟</value></data>
+  <data name="SnapToGridToggle.OffContent" xml:space="preserve"><value>關閉</value></data>
+  <data name="AutoSelectToolToggle.Header" xml:space="preserve"><value>點擊物件自動選擇選取工具</value></data>
+  <data name="AutoSelectToolToggle.OnContent" xml:space="preserve"><value>開啟</value></data>
+  <data name="AutoSelectToolToggle.OffContent" xml:space="preserve"><value>關閉</value></data>
+  <data name="CanvasSizeCombo.Header" xml:space="preserve"><value>畫布尺寸</value></data>
+  <data name="CanvasSizeA4Landscape.Content" xml:space="preserve"><value>A4 橫式</value></data>
+  <data name="CanvasSizeA4Portrait.Content" xml:space="preserve"><value>A4 直式</value></data>
+  <data name="CanvasSizeA3Landscape.Content" xml:space="preserve"><value>A3 橫式</value></data>
+  <data name="CanvasSizeLetterLandscape.Content" xml:space="preserve"><value>Letter 橫式</value></data>
+  <data name="CanvasSizeWide.Content" xml:space="preserve"><value>16:9</value></data>
+  <data name="CanvasBackgroundHeader.Text" xml:space="preserve"><value>畫布背景</value></data>
+  <data name="CanvasBackgroundTransparent" xml:space="preserve"><value>透明</value></data>
+  <data name="CanvasBackgroundWhite" xml:space="preserve"><value>白色</value></data>
+  <data name="CanvasBackgroundLightGray" xml:space="preserve"><value>淺灰色</value></data>
+  <data name="CanvasBackgroundGray" xml:space="preserve"><value>灰色</value></data>
+  <data name="CanvasBackgroundBlack" xml:space="preserve"><value>黑色</value></data>
+  <data name="CanvasBackgroundCream" xml:space="preserve"><value>米色</value></data>
+  <data name="CanvasBackgroundLightBlue" xml:space="preserve"><value>淺藍色</value></data>
+  <data name="CanvasBackgroundLightGreen" xml:space="preserve"><value>淺綠色</value></data>
+  <data name="CanvasBackgroundLightYellow" xml:space="preserve"><value>淺黃色</value></data>
+  <data name="CanvasBackgroundLightPink" xml:space="preserve"><value>淺粉色</value></data>
+  <data name="RegisterAssociation" xml:space="preserve"><value>建立／更新檔案關聯</value></data>
+  <data name="UnregisterAssociation" xml:space="preserve"><value>移除檔案關聯</value></data>
+  <data name="AssociationHeader" xml:space="preserve"><value>.mydraw 檔案關聯</value></data>
+  <data name="PreferencesTitle" xml:space="preserve"><value>偏好設定</value></data>
+  <data name="Apply" xml:space="preserve"><value>套用</value></data>
+  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="InspectorObjectTab.Header" xml:space="preserve"><value>物件</value></data>
+  <data name="InspectorLayerTab.Header" xml:space="preserve"><value>圖層</value></data>
+  <data name="InspectorCanvasTab.Header" xml:space="preserve"><value>畫布</value></data>
+  <data name="PencilSectionHeader.Text" xml:space="preserve"><value>筆畫</value></data>
+  <data name="PencilColorLabel.Text" xml:space="preserve"><value>線條顏色</value></data>
+  <data name="PencilWidthBox.Header" xml:space="preserve"><value>線條粗細</value></data>
+  <data name="PencilDashCombo.Header" xml:space="preserve"><value>線條樣式</value></data>
+  <data name="TextColorLabel.Text" xml:space="preserve"><value>文字顏色</value></data>
+  <data name="FontWeightCombo.Header" xml:space="preserve"><value>字型粗細</value></data>
+  <data name="FontWeightLight.Content" xml:space="preserve"><value>細</value></data>
+  <data name="FontWeightNormal.Content" xml:space="preserve"><value>一般</value></data>
+  <data name="FontWeightSemiBold.Content" xml:space="preserve"><value>半粗</value></data>
+  <data name="FontWeightBold.Content" xml:space="preserve"><value>粗</value></data>
+  <data name="FontWeightBlack.Content" xml:space="preserve"><value>特粗</value></data>
+</root>

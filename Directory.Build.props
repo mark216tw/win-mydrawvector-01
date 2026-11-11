@@ -1,0 +1,17 @@
+﻿<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>latest</LangVersion>
+    <Version>1.6.12</Version>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.12.0</FileVersion>
+    <Product>MyDrawVector</Product>
+    <Authors>MyDrawVector</Authors>
+  </PropertyGroup>
+</Project>
+
+
+
+

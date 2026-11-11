@@ -1,0 +1,1028 @@
+﻿<Window
+    x:Class="MyDrawVector.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MyDrawVector"
+    xmlns:controls="using:MyDrawVector.Controls"
+    xmlns:helpers="using:MyDrawVector.Helpers"
+    Title="我的向量畫布">
+
+    <Grid
+        x:Name="RootGrid"
+        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+        KeyDown="RootGrid_KeyDown"
+        KeyUp="RootGrid_KeyUp"
+        Loaded="RootGrid_Loaded">
+        <Grid.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.ThemeDictionaries>
+                    <ResourceDictionary x:Key="Light">
+                        <SolidColorBrush x:Key="WorkspaceBrush" Color="#FFE5E7EB" />
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="Dark">
+                        <SolidColorBrush x:Key="WorkspaceBrush" Color="#FF303136" />
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="HighContrast">
+                        <SolidColorBrush x:Key="WorkspaceBrush" Color="{ThemeResource SystemColorWindowColor}" />
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+                <SolidColorBrush x:Key="PageShadowBrush" Color="#66000000" />
+                <Style x:Key="CommandButtonStyle" TargetType="Button">
+                    <Setter Property="MinHeight" Value="34" />
+                    <Setter Property="Padding" Value="10,6" />
+                    <Setter Property="CornerRadius" Value="6" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style x:Key="CommandToggleButtonStyle" TargetType="ToggleButton">
+                    <Setter Property="MinHeight" Value="34" />
+                    <Setter Property="Padding" Value="10,6" />
+                    <Setter Property="CornerRadius" Value="6" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style x:Key="ToolButtonStyle" TargetType="ToggleButton">
+                    <Setter Property="Width" Value="44" />
+                    <Setter Property="Height" Value="44" />
+                    <Setter Property="Padding" Value="10" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="CornerRadius" Value="8" />
+                </Style>
+                <Style x:Key="ToolCommandButtonStyle" TargetType="Button">
+                    <Setter Property="Width" Value="44" />
+                    <Setter Property="Height" Value="44" />
+                    <Setter Property="Padding" Value="10" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                    <Setter Property="CornerRadius" Value="8" />
+                </Style>
+                <Style x:Key="ActionButtonStyle" TargetType="Button">
+                    <Setter Property="Width" Value="32" />
+                    <Setter Property="Height" Value="32" />
+                    <Setter Property="Padding" Value="6" />
+                    <Setter Property="CornerRadius" Value="6" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                </Style>
+
+                <Style x:Key="RowIconButtonStyle" TargetType="Button">
+                    <Setter Property="Width" Value="24" />
+                    <Setter Property="Height" Value="24" />
+                    <Setter Property="Padding" Value="2" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="CornerRadius" Value="4" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                </Style>
+
+                <helpers:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+                <helpers:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
+                <DataTemplate x:Key="RoundedRectangleToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 7,4 L 17,4 A 4,4 0 0 1 21,8 L 21,16 A 4,4 0 0 1 17,20 L 7,20 A 4,4 0 0 1 3,16 L 3,8 A 4,4 0 0 1 7,4 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="ArrowToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 3,12 L 21,12 M 21,12 L 15,6 M 21,12 L 15,18" />
+                </DataTemplate>
+                <DataTemplate x:Key="TriangleToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 12,2 L 22,20 2,20 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="DiamondToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 12,2 L 22,12 12,22 2,12 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="PentagonToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 12,2 L 21.51,8.91 17.88,20.09 6.12,20.09 2.49,8.91 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="HexagonToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 7,3.34 L 17,3.34 22,12 17,20.66 7,20.66 2,12 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="StarToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 12,2 L 14.94,8.05 21.61,8.98 16.78,13.65 17.93,20.27 12,17.15 6.07,20.27 7.22,13.65 2.39,8.98 9.06,8.05 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="SpeechBubbleToolIconTemplate">
+                    <FontIcon Glyph="&#xE8BD;" />
+                </DataTemplate>
+                <DataTemplate x:Key="ObjectRowTemplate">
+                    <Grid Padding="0,2" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            Grid.Column="0"
+                            Click="ObjectRowVisibility_Click"
+                            Style="{StaticResource RowIconButtonStyle}"
+                            ToolTipService.ToolTip="顯示／隱藏"
+                            AutomationProperties.Name="切換物件顯示">
+                            <Grid>
+                                <FontIcon FontSize="12" Glyph="&#xE890;" Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}" />
+                                <FontIcon FontSize="12" Glyph="&#xED1A;" Visibility="{Binding IsVisible, Converter={StaticResource InverseBoolToVisibility}}" />
+                            </Grid>
+                        </Button>
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Text="{Binding Name}"
+                            TextTrimming="CharacterEllipsis" />
+                        <Button
+                            Grid.Column="2"
+                            Click="ObjectRowLock_Click"
+                            Style="{StaticResource RowIconButtonStyle}"
+                            ToolTipService.ToolTip="鎖定／解鎖"
+                            AutomationProperties.Name="切換物件鎖定">
+                            <Grid>
+                                <FontIcon FontSize="12" Glyph="&#xE72E;" Visibility="{Binding IsLocked, Converter={StaticResource BoolToVisibility}}" />
+                                <FontIcon FontSize="12" Glyph="&#xE785;" Visibility="{Binding IsLocked, Converter={StaticResource InverseBoolToVisibility}}" />
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate x:Key="LayerRowTemplate">
+                    <Grid Padding="0,2" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            Grid.Column="0"
+                            Click="LayerRowVisibility_Click"
+                            Style="{StaticResource RowIconButtonStyle}"
+                            ToolTipService.ToolTip="顯示／隱藏"
+                            AutomationProperties.Name="切換圖層顯示">
+                            <Grid>
+                                <FontIcon FontSize="12" Glyph="&#xE890;" Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibility}}" />
+                                <FontIcon FontSize="12" Glyph="&#xED1A;" Visibility="{Binding IsVisible, Converter={StaticResource InverseBoolToVisibility}}" />
+                            </Grid>
+                        </Button>
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Text="{Binding Name}"
+                            TextTrimming="CharacterEllipsis" />
+                        <Button
+                            Grid.Column="2"
+                            Click="LayerRowLock_Click"
+                            Style="{StaticResource RowIconButtonStyle}"
+                            ToolTipService.ToolTip="鎖定／解鎖"
+                            AutomationProperties.Name="切換圖層鎖定">
+                            <Grid>
+                                <FontIcon FontSize="12" Glyph="&#xE72E;" Visibility="{Binding IsLocked, Converter={StaticResource BoolToVisibility}}" />
+                                <FontIcon FontSize="12" Glyph="&#xE785;" Visibility="{Binding IsLocked, Converter={StaticResource InverseBoolToVisibility}}" />
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border
+            Grid.Row="0"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,0,0,1">
+            <MenuBar>
+                <MenuBarItem x:Uid="FileMenu" Title="檔案">
+                    <MenuFlyoutItem x:Uid="NewMenuItem" Text="新增" KeyboardAcceleratorTextOverride="Ctrl+N" Click="NewButton_Click" />
+                    <MenuFlyoutItem x:Uid="OpenMenuItem" Text="開啟" KeyboardAcceleratorTextOverride="Ctrl+O" Click="OpenMenuItem_Click" />
+                    <MenuFlyoutSubItem x:Uid="RecentFilesMenu" x:Name="RecentFilesMenu" Text="最近開啟" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem x:Uid="SaveMenuItem" Text="儲存" KeyboardAcceleratorTextOverride="Ctrl+S" Click="SaveButton_Click" />
+                    <MenuFlyoutItem x:Uid="SaveAsMenuItem" Text="另存" KeyboardAcceleratorTextOverride="Ctrl+Shift+S" Click="SaveAsButton_Click" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutSubItem x:Uid="ExportPngMenu" Text="匯出 PNG">
+                        <MenuFlyoutItem Text="1×（標準）" Tag="1" Click="ExportScale_Click" />
+                        <MenuFlyoutItem Text="2×（高畫質）" Tag="2" Click="ExportScale_Click" />
+                        <MenuFlyoutItem Text="3×（超高畫質）" Tag="3" Click="ExportScale_Click" />
+                    </MenuFlyoutSubItem>
+                </MenuBarItem>
+                <MenuBarItem x:Uid="EditMenu" Title="編輯">
+                    <MenuFlyoutItem x:Uid="UndoMenuItem" x:Name="UndoMenuItem" Text="復原" KeyboardAcceleratorTextOverride="Ctrl+Z" Click="UndoButton_Click" />
+                    <MenuFlyoutItem x:Uid="RedoMenuItem" x:Name="RedoMenuItem" Text="重做" KeyboardAcceleratorTextOverride="Ctrl+Y" Click="RedoButton_Click" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem x:Uid="CutMenuItem" x:Name="CutMenuItem" Text="剪下" KeyboardAcceleratorTextOverride="Ctrl+X" Click="CutMenuItem_Click" />
+                    <MenuFlyoutItem x:Uid="CopyMenuItem" x:Name="CopyMenuItem" Text="複製" KeyboardAcceleratorTextOverride="Ctrl+C" Click="CopyMenuItem_Click" />
+                    <MenuFlyoutItem x:Uid="PasteMenuItem" Text="貼上" KeyboardAcceleratorTextOverride="Ctrl+V" Click="PasteMenuItem_Click" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem x:Uid="DuplicateMenuItem" x:Name="DuplicateMenuItem" Text="再製" KeyboardAcceleratorTextOverride="Ctrl+D" Click="DuplicateMenuItem_Click" />
+                    <MenuFlyoutItem x:Uid="DeleteMenuItem" x:Name="DeleteMenuItem" Text="刪除" KeyboardAcceleratorTextOverride="Delete" Click="DeleteMenuItem_Click" />
+                    <MenuFlyoutItem x:Uid="SelectAllMenuItem" Text="全選" KeyboardAcceleratorTextOverride="Ctrl+A" Click="SelectAllMenuItem_Click" />
+                </MenuBarItem>
+                <MenuBarItem x:Uid="SettingsMenu" Title="設定">
+                    <MenuFlyoutItem x:Uid="PreferencesMenuItem" Text="偏好設定" Click="Preferences_Click" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem x:Uid="AboutMenuItem" Text="關於 MyDrawVector" Click="About_Click" />
+                </MenuBarItem>
+                <MenuBarItem x:Uid="HelpMenu" Title="說明">
+                    <MenuFlyoutItem x:Uid="ShortcutsMenuItem" Text="快捷鍵一覽" Click="Shortcuts_Click" />
+                </MenuBarItem>
+            </MenuBar>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="InspectorColumn" Width="320" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Grid.Column="0"
+                Width="56"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                BorderThickness="0,0,1,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Padding="6" Spacing="4">
+                        <Button x:Uid="UndoButton" x:Name="UndoButton" Click="UndoButton_Click" IsEnabled="False" Style="{StaticResource ToolCommandButtonStyle}" ToolTipService.ToolTip="復原 (Ctrl+Z)" AutomationProperties.Name="復原">
+                            <FontIcon Glyph="&#xE7A7;" />
+                        </Button>
+                        <Button x:Uid="RedoButton" x:Name="RedoButton" Click="RedoButton_Click" IsEnabled="False" Style="{StaticResource ToolCommandButtonStyle}" ToolTipService.ToolTip="重做 (Ctrl+Y)" AutomationProperties.Name="重做">
+                            <FontIcon Glyph="&#xE7A6;" />
+                        </Button>
+                        <Border Height="1" Margin="4" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <ToggleButton x:Uid="SelectToolButton" x:Name="SelectToolButton" Tag="Select" Click="ToolButton_Click" IsChecked="True" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="選取 (V)" AutomationProperties.Name="選取工具">
+                            <controls:ToolPathIcon Data="M 3,2 L 3,21 8,16 13,23 17,20 12,14 21,14 Z" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="PencilToolButton" x:Name="PencilToolButton" Tag="Pencil" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="鉛筆 (P)" AutomationProperties.Name="鉛筆工具">
+                            <SymbolIcon Symbol="Edit" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="RectangleToolButton" x:Name="RectangleToolButton" Tag="Rectangle" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="矩形 (R)" AutomationProperties.Name="矩形工具">
+                            <controls:ToolPathIcon Data="M 3,4 L 21,4 21,20 3,20 Z" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="EllipseToolButton" x:Name="EllipseToolButton" Tag="Ellipse" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="橢圓 (E)" AutomationProperties.Name="橢圓工具">
+                            <controls:ToolPathIcon Data="M 12,3 A 10,9 0 1 0 12,21 A 10,9 0 1 0 12,3" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="LineToolButton" x:Name="LineToolButton" Tag="Line" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="直線 (L)" AutomationProperties.Name="直線工具">
+                            <controls:ToolPathIcon Data="M 3,21 L 21,3" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="TextToolButton" x:Name="TextToolButton" Tag="Text" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="文字 (T)" AutomationProperties.Name="文字工具">
+                            <FontIcon Glyph="&#xE8D2;" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="ImageToolButton" x:Name="ImageToolButton" Tag="Image" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="插入圖片 (I)" AutomationProperties.Name="插入圖片">
+                            <SymbolIcon Symbol="Pictures" />
+                        </ToggleButton>
+                        <ToggleButton x:Uid="PanToolButton" x:Name="PanToolButton" Tag="Pan" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="平移 (H)" AutomationProperties.Name="平移工具">
+                            <controls:ToolPathIcon Data="M 12,2 L 8,6 M 12,2 L 16,6 M 12,2 L 12,22 M 12,22 L 8,18 M 12,22 L 16,18 M 2,12 L 22,12 M 2,12 L 6,8 M 2,12 L 6,16 M 22,12 L 18,8 M 22,12 L 18,16" />
+                        </ToggleButton>
+                        <Border Height="1" Margin="4" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <Grid Width="44" Height="44" HorizontalAlignment="Center">
+                            <ToggleButton x:Uid="MoreShapesButton" x:Name="MoreShapesButton" Click="MoreShapesButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="更多圖形" AutomationProperties.Name="更多圖形">
+                                <FlyoutBase.AttachedFlyout>
+                                    <Flyout x:Name="MoreShapesFlyout" Placement="RightEdgeAlignedTop">
+                                        <Grid ColumnSpacing="4" RowSpacing="4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <ToggleButton x:Uid="RoundedRectangleToolButton" x:Name="RoundedRectangleToolButton" Grid.Row="0" Grid.Column="0" Tag="RoundedRectangle" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="圓角矩形" AutomationProperties.Name="圓角矩形工具" />
+                                            <ToggleButton x:Uid="ArrowToolButton" x:Name="ArrowToolButton" Grid.Row="0" Grid.Column="1" Tag="Arrow" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="箭頭" AutomationProperties.Name="箭頭工具" />
+                                            <ToggleButton x:Uid="TriangleToolButton" x:Name="TriangleToolButton" Grid.Row="0" Grid.Column="2" Tag="Triangle" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="三角形" AutomationProperties.Name="三角形工具" />
+                                            <ToggleButton x:Uid="DiamondToolButton" x:Name="DiamondToolButton" Grid.Row="0" Grid.Column="3" Tag="Diamond" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="菱形" AutomationProperties.Name="菱形工具" />
+                                            <ToggleButton x:Uid="PentagonToolButton" x:Name="PentagonToolButton" Grid.Row="1" Grid.Column="0" Tag="Pentagon" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="五邊形" AutomationProperties.Name="五邊形工具" />
+                                            <ToggleButton x:Uid="HexagonToolButton" x:Name="HexagonToolButton" Grid.Row="1" Grid.Column="1" Tag="Hexagon" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="六邊形" AutomationProperties.Name="六邊形工具" />
+                                            <ToggleButton x:Uid="StarToolButton" x:Name="StarToolButton" Grid.Row="1" Grid.Column="2" Tag="Star" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="星形" AutomationProperties.Name="星形工具" />
+                                            <ToggleButton x:Uid="SpeechBubbleToolButton" x:Name="SpeechBubbleToolButton" Grid.Row="1" Grid.Column="3" Tag="SpeechBubble" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="對話框" AutomationProperties.Name="對話框工具" />
+                                        </Grid>
+                                    </Flyout>
+                                </FlyoutBase.AttachedFlyout>
+                                <FontIcon Glyph="&#xED58;" />
+                            </ToggleButton>
+                            <Polygon
+                                Margin="0,0,4,4"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Bottom"
+                                Fill="{ThemeResource TextFillColorSecondaryBrush}"
+                                IsHitTestVisible="False"
+                                Points="0,5 5,5 5,0" />
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <local:CanvasHostControl
+                x:Name="CanvasHost"
+                Grid.Column="1"
+                AllowDrop="True"
+                Background="{ThemeResource WorkspaceBrush}"
+                DragOver="CanvasHost_DragOver"
+                DoubleTapped="CanvasHost_DoubleTapped"
+                Drop="CanvasHost_Drop"
+                PointerCanceled="CanvasHost_PointerCanceled"
+                PointerCaptureLost="CanvasHost_PointerCaptureLost"
+                PointerMoved="CanvasHost_PointerMoved"
+                PointerPressed="CanvasHost_PointerPressed"
+                PointerReleased="CanvasHost_PointerReleased"
+                PointerWheelChanged="CanvasHost_PointerWheelChanged"
+                SizeChanged="CanvasHost_SizeChanged">
+                <Canvas
+                    x:Name="SceneRoot"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    RenderTransformOrigin="0,0">
+                    <Border x:Name="PageShadow" Background="{StaticResource PageShadowBrush}" IsHitTestVisible="False" />
+                    <Border x:Name="PageBackground" IsHitTestVisible="False" />
+                    <Canvas x:Name="CheckerCanvas" IsHitTestVisible="False" Visibility="Collapsed" />
+                    <Canvas x:Name="GridCanvas" IsHitTestVisible="False" />
+                    <Canvas x:Name="ObjectCanvas" IsHitTestVisible="False" />
+                </Canvas>
+                <Canvas x:Name="PreviewCanvas" IsHitTestVisible="False" />
+                <Canvas x:Name="OverlayCanvas" IsHitTestVisible="False" />
+                <Canvas x:Name="ActionCanvas">
+                    <Border
+                        x:Name="SelectionActions"
+                        Padding="4"
+                        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" Spacing="2">
+                            <Button
+                                Click="ActionDuplicate_Click"
+                                Style="{StaticResource ActionButtonStyle}"
+                                ToolTipService.ToolTip="再製 (Ctrl+D)"
+                                AutomationProperties.Name="再製選取物件">
+                                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                            </Button>
+                            <Button
+                                x:Name="ActionRotateButton"
+                                Click="ActionRotate90_Click"
+                                Style="{StaticResource ActionButtonStyle}"
+                                ToolTipService.ToolTip="旋轉 90°"
+                                AutomationProperties.Name="旋轉九十度">
+                                <FontIcon FontSize="14" Glyph="&#xE7AD;" />
+                            </Button>
+                            <Button
+                                x:Name="ActionFlipHorizontalButton"
+                                Click="ActionFlipHorizontal_Click"
+                                Style="{StaticResource ActionButtonStyle}"
+                                ToolTipService.ToolTip="水平翻轉"
+                                AutomationProperties.Name="水平翻轉">
+                                <TextBlock FontSize="15" Text="&#x21CB;" />
+                            </Button>
+                            <Button
+                                x:Name="ActionFlipVerticalButton"
+                                Click="ActionFlipVertical_Click"
+                                Style="{StaticResource ActionButtonStyle}"
+                                ToolTipService.ToolTip="垂直翻轉"
+                                AutomationProperties.Name="垂直翻轉">
+                                <TextBlock FontSize="15" Text="&#x21C5;" />
+                            </Button>
+                            <Button
+                                Click="ActionDelete_Click"
+                                Style="{StaticResource ActionButtonStyle}"
+                                ToolTipService.ToolTip="刪除 (Delete)"
+                                AutomationProperties.Name="刪除選取物件">
+                                <FontIcon FontSize="14" Glyph="&#xE74D;" />
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Canvas>
+                <Border
+                    x:Name="CanvasHint"
+                    Padding="14,9"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="#CC1F2937"
+                    CornerRadius="8"
+                    IsHitTestVisible="False">
+                    <TextBlock
+                        FontSize="16"
+                        Foreground="White"
+                        Text="選擇左側工具開始創作，或按 Ctrl+V 貼上圖片／文字" />
+                </Border>
+            </local:CanvasHostControl>
+
+            <Border
+                x:Name="InspectorPanelHost"
+                Grid.Column="2"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                BorderThickness="1,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Padding="12,12,12,0"
+                        FontSize="18"
+                        FontWeight="SemiBold"
+                        Text="屬性" />
+                    <TabView
+                        x:Name="InspectorTabs"
+                        Grid.Row="1"
+                        CanDragTabs="False"
+                        CanReorderTabs="False"
+                        IsAddTabButtonVisible="False"
+                        TabWidthMode="Equal">
+                        <TabViewItem
+                            x:Name="InspectorObjectTab"
+                            x:Uid="InspectorObjectTab"
+                            Header="物件"
+                            IsClosable="False">
+                            <ScrollViewer x:Name="InspectorScroll" VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="InspectorObjectPanel" Padding="12" Spacing="12">
+                                    <TextBlock
+                                        x:Name="NoSelectionText"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="選取物件後可調整位置、大小、旋轉與樣式。"
+                                        TextWrapping="Wrap" />
+
+                                    <StackPanel x:Name="ShapeSection" Spacing="8" Visibility="Collapsed">
+                                        <TextBlock FontWeight="SemiBold" Text="圖形樣式" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Button x:Name="FillColorButton" Style="{StaticResource CommandButtonStyle}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Border x:Name="FillSwatch" Width="18" Height="18" CornerRadius="3" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" />
+                                                    <TextBlock Text="填色" />
+                                                </StackPanel>
+                                                <Button.Flyout>
+                                                    <Flyout x:Name="FillColorFlyout">
+                                                        <StackPanel Spacing="6">
+                                                            <Grid ColumnSpacing="8">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock
+                                                                    x:Uid="PresetFillColorsLabel"
+                                                                    VerticalAlignment="Center"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="預設顏色" />
+                                                                <Button
+                                                                    x:Uid="CloseColorFlyout"
+                                                                    Grid.Column="1"
+                                                                    AutomationProperties.Name="關閉選色視窗"
+                                                                    Click="CloseFillColorFlyout_Click"
+                                                                    Style="{StaticResource RowIconButtonStyle}"
+                                                                    ToolTipService.ToolTip="關閉">
+                                                                    <FontIcon FontSize="12" Glyph="&#xE711;" />
+                                                                </Button>
+                                                            </Grid>
+                                                            <Grid x:Name="FillPresetGrid" ColumnSpacing="2" RowSpacing="2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                </Grid.RowDefinitions>
+                                                            </Grid>
+                                                            <ColorPicker
+                                                                x:Name="FillColorPicker"
+                                                                Width="312"
+                                                                IsAlphaEnabled="True"
+                                                                IsAlphaTextInputVisible="False"
+                                                                IsColorChannelTextInputVisible="False"
+                                                                IsColorPreviewVisible="False"
+                                                                IsHexInputVisible="False"
+                                                                IsMoreButtonVisible="False"
+                                                                ColorChanged="FillColorPicker_ColorChanged" />
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                            <Button x:Name="StrokeColorButton" Style="{StaticResource CommandButtonStyle}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Border x:Name="StrokeSwatch" Width="18" Height="18" CornerRadius="3" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" />
+                                                    <TextBlock Text="邊框" />
+                                                </StackPanel>
+                                                <Button.Flyout>
+                                                    <Flyout x:Name="StrokeColorFlyout">
+                                                        <StackPanel Spacing="6">
+                                                            <Grid ColumnSpacing="8">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock
+                                                                    x:Uid="PresetStrokeColorsLabel"
+                                                                    VerticalAlignment="Center"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="預設顏色" />
+                                                                <Button
+                                                                    x:Uid="CloseColorFlyout"
+                                                                    Grid.Column="1"
+                                                                    AutomationProperties.Name="關閉選色視窗"
+                                                                    Click="CloseStrokeColorFlyout_Click"
+                                                                    Style="{StaticResource RowIconButtonStyle}"
+                                                                    ToolTipService.ToolTip="關閉">
+                                                                    <FontIcon FontSize="12" Glyph="&#xE711;" />
+                                                                </Button>
+                                                            </Grid>
+                                                            <Grid x:Name="StrokePresetGrid" ColumnSpacing="2" RowSpacing="2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                </Grid.RowDefinitions>
+                                                            </Grid>
+                                                            <ColorPicker
+                                                                x:Name="StrokeColorPicker"
+                                                                Width="312"
+                                                                IsAlphaEnabled="True"
+                                                                IsAlphaTextInputVisible="False"
+                                                                IsColorChannelTextInputVisible="False"
+                                                                IsColorPreviewVisible="False"
+                                                                IsHexInputVisible="False"
+                                                                IsMoreButtonVisible="False"
+                                                                ColorChanged="StrokeColorPicker_ColorChanged" />
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <ToggleButton
+                                                x:Uid="ShapeFillToggle"
+                                                x:Name="FillEnabledToggle"
+                                                Click="FillEnabledToggle_Click"
+                                                Content="啟用填色"
+                                                IsChecked="True"
+                                                Style="{StaticResource CommandToggleButtonStyle}" />
+                                            <ToggleButton
+                                                x:Uid="ShapeStrokeToggle"
+                                                x:Name="StrokeEnabledToggle"
+                                                Click="StrokeEnabledToggle_Click"
+                                                Content="啟用邊框"
+                                                IsChecked="True"
+                                                Style="{StaticResource CommandToggleButtonStyle}" />
+                                        </StackPanel>
+                                        <ComboBox x:Name="DashCombo" Header="線條樣式" SelectedIndex="0" SelectionChanged="DashCombo_SelectionChanged">
+                                            <ComboBoxItem Content="實線" Tag="solid" />
+                                            <ComboBoxItem Content="虛線" Tag="dash" />
+                                            <ComboBoxItem Content="點線" Tag="dot" />
+                                        </ComboBox>
+                                        <controls:NumericField x:Name="StrokeWidthBox" Header="邊框粗細" Minimum="0" Maximum="50" ValueChanged="StrokeWidthBox_ValueChanged" />
+                                        <controls:NumericField x:Name="CornerRadiusBox" Header="圓角" Minimum="0" Maximum="500" ValueChanged="CornerRadiusBox_ValueChanged" />
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="PencilSection" Spacing="8" Visibility="Collapsed">
+                                        <TextBlock x:Uid="PencilSectionHeader" FontWeight="SemiBold" Text="筆畫" />
+                                        <Button x:Name="PencilColorButton" Style="{StaticResource CommandButtonStyle}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Border x:Name="PencilSwatch" Width="18" Height="18" CornerRadius="3" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" />
+                                                <TextBlock x:Uid="PencilColorLabel" Text="線條顏色" />
+                                            </StackPanel>
+                                            <Button.Flyout>
+                                                <Flyout x:Name="PencilColorFlyout">
+                                                    <StackPanel Spacing="6">
+                                                        <Grid ColumnSpacing="8">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="*" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <TextBlock
+                                                                x:Uid="PresetStrokeColorsLabel"
+                                                                VerticalAlignment="Center"
+                                                                FontWeight="SemiBold"
+                                                                Text="預設顏色" />
+                                                            <Button
+                                                                x:Uid="CloseColorFlyout"
+                                                                Grid.Column="1"
+                                                                AutomationProperties.Name="關閉選色視窗"
+                                                                Click="ClosePencilColorFlyout_Click"
+                                                                Style="{StaticResource RowIconButtonStyle}"
+                                                                ToolTipService.ToolTip="關閉">
+                                                                <FontIcon FontSize="12" Glyph="&#xE711;" />
+                                                            </Button>
+                                                        </Grid>
+                                                        <Grid x:Name="PencilPresetGrid" ColumnSpacing="2" RowSpacing="2">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                                <ColumnDefinition Width="Auto" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+                                                        </Grid>
+                                                        <ColorPicker
+                                                            x:Name="PencilColorPicker"
+                                                            Width="312"
+                                                            IsAlphaEnabled="True"
+                                                            IsAlphaTextInputVisible="False"
+                                                            IsColorChannelTextInputVisible="False"
+                                                            IsColorPreviewVisible="False"
+                                                            IsHexInputVisible="False"
+                                                            IsMoreButtonVisible="False"
+                                                            ColorChanged="PencilColorPicker_ColorChanged" />
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                        <controls:NumericField x:Name="PencilWidthBox" Header="線條粗細" Minimum="1" Maximum="50" ValueChanged="PencilWidthBox_ValueChanged" />
+                                        <ComboBox x:Name="PencilDashCombo" Header="線條樣式" SelectedIndex="0" SelectionChanged="PencilDashCombo_SelectionChanged">
+                                            <ComboBoxItem Content="實線" Tag="solid" />
+                                            <ComboBoxItem Content="虛線" Tag="dash" />
+                                            <ComboBoxItem Content="點線" Tag="dot" />
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="OpacitySection" Spacing="8">
+                                        <TextBlock FontWeight="SemiBold" Text="透明度" />
+                                        <Slider x:Name="OpacitySlider" Maximum="1" Minimum="0" StepFrequency="0.05" ValueChanged="OpacitySlider_ValueChanged" />
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="ObjectSection" Spacing="8" Visibility="Collapsed">
+                                        <TextBlock FontWeight="SemiBold" Text="旋轉與翻轉" />
+                                        <StackPanel Orientation="Horizontal" Spacing="2">
+                                            <Button Click="Rotate0_Click" Content="0" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="旋轉 0 度" ToolTipService.ToolTip="旋轉 0 度" />
+                                            <Button Click="Rotate90_Click" Content="90" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="旋轉 90 度" ToolTipService.ToolTip="旋轉 90 度" />
+                                            <Button Click="Rotate180_Click" Content="180" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="旋轉 180 度" ToolTipService.ToolTip="旋轉 180 度" />
+                                            <Button Click="Rotate270_Click" Content="270" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="旋轉 270 度" ToolTipService.ToolTip="旋轉 270 度" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Button Click="FlipHorizontal_Click" Content="水平翻轉" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="水平翻轉" ToolTipService.ToolTip="水平翻轉" />
+                                            <Button Click="FlipVertical_Click" Content="垂直翻轉" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="垂直翻轉" ToolTipService.ToolTip="垂直翻轉" />
+                                        </StackPanel>
+
+                                        <TextBlock FontWeight="SemiBold" Text="物件順序（目前圖層）" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Button Click="BringForward_Click" Content="上移" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="上移一層" ToolTipService.ToolTip="上移一層" />
+                                            <Button Click="SendBackward_Click" Content="下移" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="下移一層" ToolTipService.ToolTip="下移一層" />
+                                            <Button Click="BringToFront_Click" Content="置頂" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="移至最上層" ToolTipService.ToolTip="移至最上層" />
+                                            <Button Click="SendToBack_Click" Content="置底" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="移至最下層" ToolTipService.ToolTip="移至最下層" />
+                                        </StackPanel>
+
+                                        <TextBlock FontWeight="SemiBold" Text="對齊" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Button Click="AlignLeft_Click" Content="左" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="靠左對齊" ToolTipService.ToolTip="靠左對齊" />
+                                            <Button Click="AlignCenterX_Click" Content="中" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="水平置中對齊" ToolTipService.ToolTip="水平置中對齊" />
+                                            <Button Click="AlignRight_Click" Content="右" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="靠右對齊" ToolTipService.ToolTip="靠右對齊" />
+                                            <Button Click="AlignTop_Click" Content="上" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="靠上對齊" ToolTipService.ToolTip="靠上對齊" />
+                                            <Button Click="AlignCenterY_Click" Content="中" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="垂直置中對齊" ToolTipService.ToolTip="垂直置中對齊" />
+                                            <Button Click="AlignBottom_Click" Content="下" Style="{StaticResource CommandButtonStyle}" AutomationProperties.Name="靠下對齊" ToolTipService.ToolTip="靠下對齊" />
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="TextSection" Spacing="8" Visibility="Collapsed">
+                                        <TextBlock FontWeight="SemiBold" Text="文字" />
+                                        <ComboBox x:Name="FontFamilyCombo" Header="字型" SelectionChanged="FontFamilyCombo_SelectionChanged" />
+                                        <controls:NumericField x:Name="FontSizeBox" Header="字型大小" Minimum="8" Maximum="200" ValueChanged="FontSizeBox_ValueChanged" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+                                            <ComboBox
+                                                x:Name="FontWeightCombo"
+                                                x:Uid="FontWeightCombo"
+                                                Header="字型粗細"
+                                                SelectedIndex="1"
+                                                SelectionChanged="FontWeightCombo_SelectionChanged">
+                                                <ComboBoxItem x:Uid="FontWeightLight" Content="細" Tag="300" />
+                                                <ComboBoxItem x:Uid="FontWeightNormal" Content="一般" Tag="400" />
+                                                <ComboBoxItem x:Uid="FontWeightSemiBold" Content="半粗" Tag="600" />
+                                                <ComboBoxItem x:Uid="FontWeightBold" Content="粗" Tag="700" />
+                                                <ComboBoxItem x:Uid="FontWeightBlack" Content="特粗" Tag="900" />
+                                            </ComboBox>
+                                            <Button
+                                                x:Name="TextColorButton"
+                                                VerticalAlignment="Bottom"
+                                                Style="{StaticResource CommandButtonStyle}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <Border x:Name="TextSwatch" Width="18" Height="18" CornerRadius="3" BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}" BorderThickness="1" />
+                                                    <TextBlock x:Uid="TextColorLabel" Text="文字顏色" />
+                                                </StackPanel>
+                                                <Button.Flyout>
+                                                    <Flyout x:Name="TextColorFlyout">
+                                                        <StackPanel Spacing="6">
+                                                            <Grid ColumnSpacing="8">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock
+                                                                    x:Uid="PresetStrokeColorsLabel"
+                                                                    VerticalAlignment="Center"
+                                                                    FontWeight="SemiBold"
+                                                                    Text="預設顏色" />
+                                                                <Button
+                                                                    x:Uid="CloseColorFlyout"
+                                                                    Grid.Column="1"
+                                                                    AutomationProperties.Name="關閉選色視窗"
+                                                                    Click="CloseTextColorFlyout_Click"
+                                                                    Style="{StaticResource RowIconButtonStyle}"
+                                                                    ToolTipService.ToolTip="關閉">
+                                                                    <FontIcon FontSize="12" Glyph="&#xE711;" />
+                                                                </Button>
+                                                            </Grid>
+                                                            <Grid x:Name="TextPresetGrid" ColumnSpacing="2" RowSpacing="2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                    <RowDefinition Height="Auto" />
+                                                                </Grid.RowDefinitions>
+                                                            </Grid>
+                                                            <ColorPicker
+                                                                x:Name="TextColorPicker"
+                                                                Width="312"
+                                                                IsAlphaEnabled="True"
+                                                                IsAlphaTextInputVisible="False"
+                                                                IsColorChannelTextInputVisible="False"
+                                                                IsColorPreviewVisible="False"
+                                                                IsHexInputVisible="False"
+                                                                IsMoreButtonVisible="False"
+                                                                ColorChanged="TextColorPicker_ColorChanged" />
+                                                        </StackPanel>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <ToggleButton x:Name="ItalicToggle" Click="ItalicToggle_Click" Content="斜體" />
+                                            <ToggleButton x:Name="UnderlineToggle" Click="UnderlineToggle_Click" Content="底線" />
+                                            <ComboBox
+                                                x:Name="AlignCombo"
+                                                AutomationProperties.Name="文字對齊"
+                                                SelectedIndex="0"
+                                                SelectionChanged="AlignCombo_SelectionChanged"
+                                                ToolTipService.ToolTip="文字對齊">
+                                                <ComboBoxItem Content="靠左" Tag="Left" />
+                                                <ComboBoxItem Content="置中" Tag="Center" />
+                                                <ComboBoxItem Content="靠右" Tag="Right" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <controls:NumericField x:Name="LineSpacingBox" Header="行距" Minimum="0.8" Maximum="3" Step="0.1" ValueChanged="LineSpacingBox_ValueChanged" />
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="ImageSection" Spacing="8" Visibility="Collapsed">
+                                        <TextBlock FontWeight="SemiBold" Text="圖片" />
+                                        <Button Click="ReplaceImage_Click" Content="替換圖片" Style="{StaticResource CommandButtonStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabViewItem>
+                        <TabViewItem x:Uid="InspectorLayerTab" Header="圖層" IsClosable="False">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="InspectorLayerPanel" Padding="12" Spacing="12">
+                                    <StackPanel x:Name="LayersSection" Spacing="6">
+                                        <TextBlock FontWeight="SemiBold" Text="目前圖層物件" />
+                                        <ListView
+                                            x:Name="ObjectsList"
+                                            Height="130"
+                                            ItemTemplate="{StaticResource ObjectRowTemplate}"
+                                            SelectionChanged="ObjectsList_SelectionChanged"
+                                            SelectionMode="Single">
+                                            <ListView.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem Text="顯示／隱藏" Click="ToggleObjectVisibility_Click" />
+                                                    <MenuFlyoutItem Text="鎖定／解鎖" Click="ToggleObjectLock_Click" />
+                                                    <MenuFlyoutItem Text="重新命名" Click="RenameObject_Click" />
+                                                </MenuFlyout>
+                                            </ListView.ContextFlyout>
+                                        </ListView>
+                                        <TextBlock FontWeight="SemiBold" Text="圖層" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Button Click="AddLayer_Click" Content="新增" Style="{StaticResource CommandButtonStyle}" />
+                                            <Button Click="RenameLayer_Click" Content="改名" Style="{StaticResource CommandButtonStyle}" />
+                                            <Button Click="DeleteLayer_Click" Content="刪除" Style="{StaticResource CommandButtonStyle}" />
+                                        </StackPanel>
+                                        <ListView
+                                            x:Name="LayersList"
+                                            Height="110"
+                                            ItemTemplate="{StaticResource LayerRowTemplate}"
+                                            SelectionChanged="LayersList_SelectionChanged"
+                                            SelectionMode="Single" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <Button Click="LayerUp_Click" Content="上移" Style="{StaticResource CommandButtonStyle}" />
+                                            <Button Click="LayerDown_Click" Content="下移" Style="{StaticResource CommandButtonStyle}" />
+                                            <Button Click="ToggleCurrentLayerVisibility_Click" Content="顯示／隱藏" Style="{StaticResource CommandButtonStyle}" />
+                                            <Button Click="ToggleCurrentLayerLock_Click" Content="鎖定／解鎖" Style="{StaticResource CommandButtonStyle}" />
+                                        </StackPanel>
+                                        <TextBlock
+                                            x:Name="CurrentLayerInfo"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            FontSize="12"
+                                            Text="目前圖層：圖層 1（0 個物件）"
+                                            TextWrapping="Wrap" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            FontSize="12"
+                                            Text="提示：拖曳物件可移動，拖曳控制點可縮放，上方圓點可旋轉。"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabViewItem>
+                        <TabViewItem x:Uid="InspectorCanvasTab" Header="畫布" IsClosable="False">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="InspectorCanvasPanel" Padding="12" Spacing="12">
+                                    <StackPanel x:Name="CanvasSection" Spacing="8">
+                                        <TextBlock x:Uid="CanvasSectionHeader" FontWeight="SemiBold" Text="畫布" />
+                                        <ToggleSwitch
+                                            x:Uid="ShowGridToggle"
+                                            x:Name="ShowGridToggle"
+                                            Header="顯示格線"
+                                            Toggled="ShowGridToggle_Toggled" />
+                                        <ToggleSwitch
+                                            x:Uid="SnapToGridToggle"
+                                            x:Name="SnapToGridToggle"
+                                            Header="吸附至格線"
+                                            Toggled="SnapToGridToggle_Toggled" />
+                                        <ToggleSwitch
+                                            x:Uid="AutoSelectToolToggle"
+                                            x:Name="AutoSelectToolToggle"
+                                            Header="點擊物件自動選擇選取工具"
+                                            Toggled="AutoSelectToolToggle_Toggled" />
+                                        <ComboBox
+                                            x:Uid="CanvasSizeCombo"
+                                            x:Name="CanvasSizeCombo"
+                                            Header="畫布尺寸"
+                                            SelectionChanged="CanvasSizeCombo_SelectionChanged">
+                                            <ComboBoxItem x:Uid="CanvasSizeA4Landscape" Content="A4 橫式" Tag="A4L" />
+                                            <ComboBoxItem x:Uid="CanvasSizeA4Portrait" Content="A4 直式" Tag="A4P" />
+                                            <ComboBoxItem x:Uid="CanvasSizeA3Landscape" Content="A3 橫式" Tag="A3L" />
+                                            <ComboBoxItem x:Uid="CanvasSizeLetterLandscape" Content="Letter 橫式" Tag="LetterL" />
+                                            <ComboBoxItem x:Uid="CanvasSizeWide" Content="16:9" Tag="Wide" />
+                                        </ComboBox>
+                                        <TextBlock x:Uid="CanvasBackgroundHeader" FontWeight="SemiBold" Text="畫布背景" />
+                                        <Grid x:Name="CanvasBackgroundGrid" ColumnSpacing="4" RowSpacing="4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabViewItem>
+                    </TabView>
+                </Grid>
+            </Border>
+
+            <Border
+                x:Name="DeleteToast"
+                Grid.Column="1"
+                Margin="0,0,0,20"
+                Padding="14,8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock x:Name="DeleteToastText" VerticalAlignment="Center" Text="已刪除選取物件" />
+                    <Button
+                        Click="DeleteToastUndo_Click"
+                        Content="復原"
+                        Style="{StaticResource CommandButtonStyle}" />
+                    <Button
+                        Click="DeleteToastClose_Click"
+                        Style="{StaticResource CommandButtonStyle}"
+                        ToolTipService.ToolTip="關閉"
+                        AutomationProperties.Name="關閉提示">
+                        <FontIcon FontSize="12" Glyph="&#xE711;" />
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Border
+            Grid.Row="2"
+            Padding="10,4"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid ColumnSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                    <TextBlock x:Name="DirtyText" VerticalAlignment="Center" Foreground="{ThemeResource SystemFillColorCautionBrush}" />
+                    <TextBlock x:Name="StatusTextBlock" VerticalAlignment="Center" Text="就緒" />
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                    <TextBlock
+                        x:Name="CanvasInfoText"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        FontSize="12" />
+                    <TextBlock
+                        x:Name="AutosaveText"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        FontSize="12" />
+                </StackPanel>
+                <StackPanel
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <ToggleButton
+                        x:Name="InspectorToggle"
+                        MinHeight="34"
+                        Padding="10,6"
+                        AutomationProperties.Name="屬性面板"
+                        Click="InspectorToggle_Click"
+                        Content="屬性"
+                        CornerRadius="6"
+                        IsChecked="True"
+                        ToolTipService.ToolTip="顯示或隱藏屬性面板" />
+                    <TextBlock VerticalAlignment="Center" Text="縮放" />
+                    <Slider x:Name="ZoomSlider" Width="150" ValueChanged="ZoomSlider_ValueChanged" />
+                    <Button
+                        Click="ZoomOut_Click"
+                        Content="－"
+                        Style="{StaticResource CommandButtonStyle}"
+                        ToolTipService.ToolTip="縮小 (Ctrl+-)"
+                        AutomationProperties.Name="縮小" />
+                    <TextBlock
+                        x:Name="ZoomText"
+                        MinWidth="48"
+                        VerticalAlignment="Center"
+                        Text="100%"
+                        TextAlignment="Center" />
+                    <Button
+                        Click="ZoomIn_Click"
+                        Content="＋"
+                        Style="{StaticResource CommandButtonStyle}"
+                        ToolTipService.ToolTip="放大 (Ctrl++)"
+                        AutomationProperties.Name="放大" />
+                    <Button
+                        Click="Zoom100_Click"
+                        Content="100%"
+                        Style="{StaticResource CommandButtonStyle}"
+                        ToolTipService.ToolTip="重設為 100% (Ctrl+0)"
+                        AutomationProperties.Name="縮放重設為百分之百" />
+                    <Button
+                        Click="FitButton_Click"
+                        Content="適合視窗"
+                        Style="{StaticResource CommandButtonStyle}"
+                        ToolTipService.ToolTip="適合視窗 (Ctrl+1)"
+                        AutomationProperties.Name="適合視窗" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Button
+            x:Name="FocusSink"
+            Grid.Row="2"
+            Width="1"
+            Height="1"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            IsTabStop="True"
+            Opacity="0" />
+    </Grid>
+</Window>
+
