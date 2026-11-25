@@ -60,6 +60,8 @@ public sealed partial class MainWindow : Window
         [EditorTool.Hexagon] = "HexagonToolIconTemplate",
         [EditorTool.Star] = "StarToolIconTemplate",
         [EditorTool.SpeechBubble] = "SpeechBubbleToolIconTemplate",
+        [EditorTool.Polygon] = "PolygonToolIconTemplate",
+        [EditorTool.CurvedPolygon] = "CurvedPolygonToolIconTemplate",
     };
 
     private static readonly string[] CuratedFonts =
@@ -333,6 +335,8 @@ public sealed partial class MainWindow : Window
         _toolButtons[EditorTool.Hexagon] = HexagonToolButton;
         _toolButtons[EditorTool.Star] = StarToolButton;
         _toolButtons[EditorTool.SpeechBubble] = SpeechBubbleToolButton;
+        _toolButtons[EditorTool.Polygon] = PolygonToolButton;
+        _toolButtons[EditorTool.CurvedPolygon] = CurvedPolygonToolButton;
         _toolButtons[EditorTool.Text] = TextToolButton;
         _toolButtons[EditorTool.Image] = ImageToolButton;
         _toolButtons[EditorTool.Pencil] = PencilToolButton;
@@ -850,6 +854,7 @@ public sealed partial class MainWindow : Window
             TextObject => new TextBlock { TextWrapping = TextWrapping.Wrap, IsHitTestVisible = false },
             ImageObject => new Image { Stretch = Stretch.Fill, IsHitTestVisible = false },
             PathObject => new XamlPath { IsHitTestVisible = false },
+            PolygonObject => new XamlPath { IsHitTestVisible = false },
             _ => new Border { IsHitTestVisible = false },
         };
 
@@ -895,6 +900,9 @@ public sealed partial class MainWindow : Window
                 break;
             case PathObject freehand when visual is XamlPath path:
                 UpdateFreehandPath(path, freehand);
+                break;
+            case PolygonObject polygon when visual is XamlPath path:
+                UpdatePolygonPath(path, polygon);
                 break;
         }
     }
@@ -1297,6 +1305,20 @@ public sealed partial class MainWindow : Window
     private void RenderOverlay()
     {
         OverlayCanvas.Children.Clear();
+        EnsureEditingPolygonStillValid();
+
+        if (_isDrawingPolygon)
+        {
+            RenderPolygonDraftOverlay();
+            return;
+        }
+
+        if (_editingPolygon is not null)
+        {
+            RenderPolygonEditOverlay(_editingPolygon);
+            return;
+        }
+
         var selection = _viewModel.Selection;
         if (selection.Count == 0)
         {
@@ -1533,6 +1555,41 @@ public sealed partial class MainWindow : Window
         var isCtrl = IsKeyDown(VirtualKey.Control);
         var isShift = IsKeyDown(VirtualKey.Shift);
 
+        if (_isDrawingPolygon)
+        {
+            if (properties.IsRightButtonPressed)
+            {
+                UndoLastDraftPolygonVertex();
+                e.Handled = true;
+                return;
+            }
+
+            if (properties.IsLeftButtonPressed && !IsKeyDown(VirtualKey.Space))
+            {
+                HandlePolygonDraftClick(screenPoint, worldPoint, isShift);
+                e.Handled = true;
+                return;
+            }
+        }
+
+        if (_editingPolygon is not null)
+        {
+            if (properties.IsRightButtonPressed && HandlePolygonEditRightClick(screenPoint))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            if (properties.IsLeftButtonPressed && !IsKeyDown(VirtualKey.Space))
+            {
+                if (HandlePolygonEditPointerPressed(screenPoint, e.Pointer))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
+        }
+
         if (properties.IsMiddleButtonPressed ||
             properties.IsRightButtonPressed ||
             _tool == EditorTool.Pan ||
@@ -1546,6 +1603,13 @@ public sealed partial class MainWindow : Window
 
         if (!properties.IsLeftButtonPressed)
         {
+            return;
+        }
+
+        if (IsPolygonTool(_tool))
+        {
+            HandlePolygonDraftClick(screenPoint, worldPoint, isShift);
+            e.Handled = true;
             return;
         }
 
@@ -1668,15 +1732,36 @@ public sealed partial class MainWindow : Window
 
     private void UpdateCursor()
     {
-        CanvasHost.SetCursor(_tool == EditorTool.Pan
-            ? InputSystemCursorShape.SizeAll
-            : InputSystemCursorShape.Arrow);
+        if (_tool == EditorTool.Pan)
+        {
+            CanvasHost.SetCursor(InputSystemCursorShape.SizeAll);
+        }
+        else if (IsPolygonTool(_tool))
+        {
+            CanvasHost.SetCursor(InputSystemCursorShape.Cross);
+        }
+        else
+        {
+            CanvasHost.SetCursor(InputSystemCursorShape.Arrow);
+        }
     }
 
     private void CanvasHost_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
         var screenPoint = e.GetCurrentPoint(CanvasHost).Position;
         var worldPoint = ScreenToWorld(screenPoint);
+
+        if (_isDrawingPolygon && _dragMode == DragMode.None)
+        {
+            UpdatePolygonDraftCursor(screenPoint, worldPoint);
+            return;
+        }
+
+        if (_editingPolygon is not null && _dragMode == DragMode.None)
+        {
+            UpdatePolygonEditHover(screenPoint);
+            return;
+        }
 
         switch (_dragMode)
         {
@@ -1711,6 +1796,9 @@ public sealed partial class MainWindow : Window
             case DragMode.Pencil:
                 AppendPencilPoint(screenPoint, worldPoint);
                 break;
+            case DragMode.PolygonVertex:
+                DragPolygonVertex(worldPoint);
+                break;
         }
     }
 
@@ -1734,6 +1822,9 @@ public sealed partial class MainWindow : Window
                 break;
             case DragMode.Pencil:
                 FinishPencil();
+                break;
+            case DragMode.PolygonVertex:
+                FinishPolygonVertexDrag();
                 break;
         }
 
@@ -1817,8 +1908,35 @@ public sealed partial class MainWindow : Window
 
     private void CanvasHost_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
-        var world = ScreenToWorld(e.GetPosition(CanvasHost));
-        if (HitTestObject(world) is TextObject text)
+        var screenPoint = e.GetPosition(CanvasHost);
+        if (_isDrawingPolygon)
+        {
+            FinishPolygonDraft();
+            e.Handled = true;
+            return;
+        }
+
+        if (_editingPolygon is not null)
+        {
+            if (_suppressNextPolygonDoubleTap)
+            {
+                _suppressNextPolygonDoubleTap = false;
+                e.Handled = true;
+                return;
+            }
+
+            var vertexIndex = HitTestPolygonVertex(_editingPolygon, screenPoint);
+            if (vertexIndex >= 0)
+            {
+                TogglePolygonVertexSmooth(_editingPolygon, vertexIndex);
+                e.Handled = true;
+                return;
+            }
+        }
+
+        var world = ScreenToWorld(screenPoint);
+        var hit = HitTestObject(world);
+        if (hit is TextObject text)
         {
             if (_viewModel.Document.FindLayer(text.LayerId) is { } layer)
             {
@@ -1828,6 +1946,18 @@ public sealed partial class MainWindow : Window
             SetTool(EditorTool.Select);
             _viewModel.Select(text, additive: false);
             _ = EditTextAsync(text);
+            e.Handled = true;
+            return;
+        }
+
+        if (hit is PolygonObject polygon)
+        {
+            if (_viewModel.Document.FindLayer(polygon.LayerId) is { } layer)
+            {
+                _viewModel.SetCurrentLayer(layer);
+            }
+
+            EnterPolygonEditMode(polygon);
             e.Handled = true;
         }
     }
@@ -2568,7 +2698,8 @@ public sealed partial class MainWindow : Window
             OpacitySection.Visibility = hasSelection ? Visibility.Visible : Visibility.Collapsed;
 
             var primary = selection.Count == 1 ? selection[0] : null;
-            ShapeSection.Visibility = primary is ShapeObject ? Visibility.Visible : Visibility.Collapsed;
+            ShapeSection.Visibility = primary is ShapeObject or PolygonObject ? Visibility.Visible : Visibility.Collapsed;
+            PolygonEditPanel.Visibility = primary is PolygonObject ? Visibility.Visible : Visibility.Collapsed;
             PencilSection.Visibility = primary is PathObject ? Visibility.Visible : Visibility.Collapsed;
             TextSection.Visibility = primary is TextObject ? Visibility.Visible : Visibility.Collapsed;
             ImageSection.Visibility = primary is ImageObject ? Visibility.Visible : Visibility.Collapsed;
@@ -2608,6 +2739,31 @@ public sealed partial class MainWindow : Window
                             "dot" => 2,
                             _ => 0,
                         };
+                        break;
+                    case PolygonObject polygon:
+                        FillColorPicker.Color = ColorHelper.FromHex(polygon.Fill);
+                        StrokeColorPicker.Color = ColorHelper.FromHex(polygon.Stroke);
+                        FillSwatch.Background = ColorHelper.Brush(polygon.Fill);
+                        StrokeSwatch.Background = ColorHelper.Brush(polygon.Stroke);
+                        FillEnabledToggle.IsChecked = polygon.IsFilled;
+                        StrokeEnabledToggle.IsChecked = polygon.IsStroked;
+                        FillColorButton.IsEnabled = polygon.IsFilled;
+                        StrokeColorButton.IsEnabled = polygon.IsStroked;
+                        FillSwatch.Opacity = polygon.IsFilled ? 1 : 0.35;
+                        StrokeSwatch.Opacity = polygon.IsStroked ? 1 : 0.35;
+                        StrokeWidthBox.Value = polygon.StrokeWidth;
+                        CornerRadiusBox.Visibility = Visibility.Collapsed;
+                        DashCombo.SelectedIndex = polygon.Dash switch
+                        {
+                            "dash" => 1,
+                            "dot" => 2,
+                            _ => 0,
+                        };
+                        EditVerticesToggle.IsChecked = ReferenceEquals(_editingPolygon, polygon);
+                        var smoothnessPercent = Math.Clamp(Math.Round(polygon.Smoothness * 100), 0, 100);
+                        PolygonSmoothnessSlider.Value = smoothnessPercent;
+                        PolygonSmoothnessBox.Value = smoothnessPercent;
+                        PolygonSmoothnessValueText.Text = $"{smoothnessPercent:0}%";
                         break;
                     case PathObject path:
                         PencilColorPicker.Color = ColorHelper.FromHex(path.Stroke);
@@ -3056,27 +3212,43 @@ public sealed partial class MainWindow : Window
 
     private void FillColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
     {
-        if (_isApplyingInspector || DateTime.UtcNow < _colorGuardUntil || PrimarySelection is not ShapeObject shape)
+        if (_isApplyingInspector || DateTime.UtcNow < _colorGuardUntil)
         {
             return;
         }
 
-        ApplyFillColor(shape, args.NewColor);
+        if (PrimarySelection is ShapeObject shape)
+        {
+            ApplyFillColor(shape, args.NewColor);
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            ApplyPolygonFillColor(polygon, args.NewColor);
+        }
     }
 
     private void PresetFillColor_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string id } ||
-            FillColorPalette.Get(id) is not { } option ||
-            PrimarySelection is not ShapeObject shape)
+            FillColorPalette.Get(id) is not { } option)
         {
             return;
         }
 
-        _isApplyingInspector = true;
-        FillColorPicker.Color = option.Color;
-        _isApplyingInspector = false;
-        ApplyFillColor(shape, option.Color);
+        if (PrimarySelection is ShapeObject shape)
+        {
+            _isApplyingInspector = true;
+            FillColorPicker.Color = option.Color;
+            _isApplyingInspector = false;
+            ApplyFillColor(shape, option.Color);
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            _isApplyingInspector = true;
+            FillColorPicker.Color = option.Color;
+            _isApplyingInspector = false;
+            ApplyPolygonFillColor(polygon, option.Color);
+        }
     }
 
     private void CloseFillColorFlyout_Click(object sender, RoutedEventArgs e)
@@ -3101,87 +3273,170 @@ public sealed partial class MainWindow : Window
         _viewModel.MarkDirty();
     }
 
-    private void FillEnabledToggle_Click(object sender, RoutedEventArgs e)
+    private void ApplyPolygonFillColor(PolygonObject polygon, Color color)
     {
-        if (_isApplyingInspector || PrimarySelection is not ShapeObject shape)
-        {
-            return;
-        }
-
-        var enabled = FillEnabledToggle.IsChecked == true;
-        if (shape.IsFilled == enabled)
+        var fill = ColorHelper.ToHex(color);
+        var isFilled = color.A > 0;
+        if (polygon.Fill == fill && polygon.IsFilled == isFilled)
         {
             return;
         }
 
         _viewModel.PushUndo("fill");
-        shape.IsFilled = enabled;
-        if (enabled && ColorHelper.FromHex(shape.Fill).A == 0)
+        polygon.Fill = fill;
+        polygon.IsFilled = isFilled;
+        SavePolygonStyle(polygon);
+        FillSwatch.Background = new SolidColorBrush(color);
+        _viewModel.MarkDirty();
+    }
+
+    private void FillEnabledToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isApplyingInspector)
         {
-            var fallbackFill = GetShapeStyle(shape.Kind).Fill;
-            shape.Fill = ColorHelper.FromHex(fallbackFill).A > 0 ? fallbackFill : "#FF4F9CFF";
+            return;
         }
 
-        SaveShapeStyle(shape);
-        _viewModel.MarkDirty();
+        var enabled = FillEnabledToggle.IsChecked == true;
+        if (PrimarySelection is ShapeObject shape)
+        {
+            if (shape.IsFilled == enabled)
+            {
+                return;
+            }
+
+            _viewModel.PushUndo("fill");
+            shape.IsFilled = enabled;
+            if (enabled && ColorHelper.FromHex(shape.Fill).A == 0)
+            {
+                var fallbackFill = GetShapeStyle(shape.Kind).Fill;
+                shape.Fill = ColorHelper.FromHex(fallbackFill).A > 0 ? fallbackFill : "#FF4F9CFF";
+            }
+
+            SaveShapeStyle(shape);
+            _viewModel.MarkDirty();
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            if (polygon.IsFilled == enabled)
+            {
+                return;
+            }
+
+            _viewModel.PushUndo("fill");
+            polygon.IsFilled = enabled;
+            if (enabled && ColorHelper.FromHex(polygon.Fill).A == 0)
+            {
+                var fallbackFill = GetPolygonStyle().Fill;
+                polygon.Fill = ColorHelper.FromHex(fallbackFill).A > 0 ? fallbackFill : "#FF4F9CFF";
+            }
+
+            SavePolygonStyle(polygon);
+            _viewModel.MarkDirty();
+        }
     }
 
     private void StrokeEnabledToggle_Click(object sender, RoutedEventArgs e)
     {
-        if (_isApplyingInspector || PrimarySelection is not ShapeObject shape)
+        if (_isApplyingInspector)
         {
             return;
         }
 
         var enabled = StrokeEnabledToggle.IsChecked == true;
-        if (shape.IsStroked == enabled)
+        if (PrimarySelection is ShapeObject shape)
         {
-            return;
-        }
-
-        _viewModel.PushUndo("stroke");
-        shape.IsStroked = enabled;
-        if (enabled)
-        {
-            if (ColorHelper.FromHex(shape.Stroke).A == 0)
+            if (shape.IsStroked == enabled)
             {
-                var fallbackStroke = GetShapeStyle(shape.Kind).Stroke;
-                shape.Stroke = ColorHelper.FromHex(fallbackStroke).A > 0 ? fallbackStroke : "#FF1F2937";
+                return;
             }
 
-            if (shape.StrokeWidth <= 0)
+            _viewModel.PushUndo("stroke");
+            shape.IsStroked = enabled;
+            if (enabled)
             {
-                shape.StrokeWidth = 2;
-            }
-        }
+                if (ColorHelper.FromHex(shape.Stroke).A == 0)
+                {
+                    var fallbackStroke = GetShapeStyle(shape.Kind).Stroke;
+                    shape.Stroke = ColorHelper.FromHex(fallbackStroke).A > 0 ? fallbackStroke : "#FF1F2937";
+                }
 
-        SaveShapeStyle(shape);
-        _viewModel.MarkDirty();
+                if (shape.StrokeWidth <= 0)
+                {
+                    shape.StrokeWidth = 2;
+                }
+            }
+
+            SaveShapeStyle(shape);
+            _viewModel.MarkDirty();
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            if (polygon.IsStroked == enabled)
+            {
+                return;
+            }
+
+            _viewModel.PushUndo("stroke");
+            polygon.IsStroked = enabled;
+            if (enabled)
+            {
+                if (ColorHelper.FromHex(polygon.Stroke).A == 0)
+                {
+                    var fallbackStroke = GetPolygonStyle().Stroke;
+                    polygon.Stroke = ColorHelper.FromHex(fallbackStroke).A > 0 ? fallbackStroke : "#FF1F2937";
+                }
+
+                if (polygon.StrokeWidth <= 0)
+                {
+                    polygon.StrokeWidth = 2;
+                }
+            }
+
+            SavePolygonStyle(polygon);
+            _viewModel.MarkDirty();
+        }
     }
 
     private void StrokeColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
     {
-        if (_isApplyingInspector || DateTime.UtcNow < _colorGuardUntil || PrimarySelection is not ShapeObject shape)
+        if (_isApplyingInspector || DateTime.UtcNow < _colorGuardUntil)
         {
             return;
         }
 
-        ApplyStrokeColor(shape, args.NewColor);
+        if (PrimarySelection is ShapeObject shape)
+        {
+            ApplyStrokeColor(shape, args.NewColor);
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            ApplyPolygonStrokeColor(polygon, args.NewColor);
+        }
     }
 
     private void PresetStrokeColor_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string id } ||
-            FillColorPalette.Get(id) is not { } option ||
-            PrimarySelection is not ShapeObject shape)
+            FillColorPalette.Get(id) is not { } option)
         {
             return;
         }
 
-        _isApplyingInspector = true;
-        StrokeColorPicker.Color = option.Color;
-        _isApplyingInspector = false;
-        ApplyStrokeColor(shape, option.Color);
+        if (PrimarySelection is ShapeObject shape)
+        {
+            _isApplyingInspector = true;
+            StrokeColorPicker.Color = option.Color;
+            _isApplyingInspector = false;
+            ApplyStrokeColor(shape, option.Color);
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            _isApplyingInspector = true;
+            StrokeColorPicker.Color = option.Color;
+            _isApplyingInspector = false;
+            ApplyPolygonStrokeColor(polygon, option.Color);
+        }
     }
 
     private void CloseStrokeColorFlyout_Click(object sender, RoutedEventArgs e)
@@ -3206,18 +3461,46 @@ public sealed partial class MainWindow : Window
         _viewModel.MarkDirty();
     }
 
-    private void StrokeWidthBox_ValueChanged(object? sender, NumericFieldValueChangedEventArgs args)
+    private void ApplyPolygonStrokeColor(PolygonObject polygon, Color color)
     {
-        if (_isApplyingInspector || PrimarySelection is not ShapeObject shape || double.IsNaN(args.Value))
+        var stroke = ColorHelper.ToHex(color);
+        var isStroked = color.A > 0 && polygon.StrokeWidth > 0;
+        if (polygon.Stroke == stroke && polygon.IsStroked == isStroked)
         {
             return;
         }
 
-        _viewModel.PushUndo("strokeWidth");
-        shape.StrokeWidth = Math.Max(0, args.Value);
-        shape.IsStroked = shape.StrokeWidth > 0;
-        SaveShapeStyle(shape);
+        _viewModel.PushUndo("stroke");
+        polygon.Stroke = stroke;
+        polygon.IsStroked = isStroked;
+        SavePolygonStyle(polygon);
+        StrokeSwatch.Background = new SolidColorBrush(color);
         _viewModel.MarkDirty();
+    }
+
+    private void StrokeWidthBox_ValueChanged(object? sender, NumericFieldValueChangedEventArgs args)
+    {
+        if (_isApplyingInspector || double.IsNaN(args.Value))
+        {
+            return;
+        }
+
+        if (PrimarySelection is ShapeObject shape)
+        {
+            _viewModel.PushUndo("strokeWidth");
+            shape.StrokeWidth = Math.Max(0, args.Value);
+            shape.IsStroked = shape.StrokeWidth > 0;
+            SaveShapeStyle(shape);
+            _viewModel.MarkDirty();
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            _viewModel.PushUndo("strokeWidth");
+            polygon.StrokeWidth = Math.Max(0, args.Value);
+            polygon.IsStroked = polygon.StrokeWidth > 0;
+            SavePolygonStyle(polygon);
+            _viewModel.MarkDirty();
+        }
     }
 
     private void CornerRadiusBox_ValueChanged(object? sender, NumericFieldValueChangedEventArgs args)
@@ -3235,22 +3518,37 @@ public sealed partial class MainWindow : Window
 
     private void DashCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_isApplyingInspector || DateTime.UtcNow < _colorGuardUntil || PrimarySelection is not ShapeObject shape)
+        if (_isApplyingInspector || DateTime.UtcNow < _colorGuardUntil)
         {
             return;
         }
 
         var item = DashCombo.SelectedItem as ComboBoxItem;
         var value = item?.Tag as string ?? "solid";
-        if (shape.Dash == value)
+        if (PrimarySelection is ShapeObject shape)
         {
-            return;
-        }
+            if (shape.Dash == value)
+            {
+                return;
+            }
 
-        _viewModel.PushUndo();
-        shape.Dash = value;
-        SaveShapeStyle(shape);
-        _viewModel.MarkDirty();
+            _viewModel.PushUndo();
+            shape.Dash = value;
+            SaveShapeStyle(shape);
+            _viewModel.MarkDirty();
+        }
+        else if (PrimarySelection is PolygonObject polygon)
+        {
+            if (polygon.Dash == value)
+            {
+                return;
+            }
+
+            _viewModel.PushUndo();
+            polygon.Dash = value;
+            SavePolygonStyle(polygon);
+            _viewModel.MarkDirty();
+        }
     }
 
     private void PencilColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
@@ -3882,6 +4180,15 @@ public sealed partial class MainWindow : Window
 
     private void SetTool(EditorTool tool)
     {
+        if (_tool != tool)
+        {
+            CancelPolygonDraft();
+            if (tool != EditorTool.Select)
+            {
+                ExitPolygonEditMode();
+            }
+        }
+
         _tool = tool;
         foreach (var (buttonTool, button) in _toolButtons)
         {
@@ -4744,13 +5051,62 @@ public sealed partial class MainWindow : Window
 
         if (e.Key == VirtualKey.Delete || e.Key == VirtualKey.Back)
         {
+            if (_isDrawingPolygon)
+            {
+                UndoLastDraftPolygonVertex();
+                e.Handled = true;
+                return;
+            }
+
+            if (_editingPolygon is not null)
+            {
+                if (_selectedVertexIndex >= 0)
+                {
+                    DeletePolygonVertex(_editingPolygon, _selectedVertexIndex);
+                }
+
+                e.Handled = true;
+                return;
+            }
+
             DeleteSelection();
             e.Handled = true;
             return;
         }
 
+        if (e.Key == VirtualKey.Enter)
+        {
+            if (_isDrawingPolygon)
+            {
+                FinishPolygonDraft();
+                e.Handled = true;
+                return;
+            }
+
+            if (_editingPolygon is not null)
+            {
+                ExitPolygonEditMode();
+                e.Handled = true;
+                return;
+            }
+        }
+
         if (e.Key == VirtualKey.Escape)
         {
+            if (_isDrawingPolygon)
+            {
+                CancelPolygonDraft();
+                e.Handled = true;
+                return;
+            }
+
+            if (_editingPolygon is not null)
+            {
+                ExitPolygonEditMode();
+                e.Handled = true;
+                return;
+            }
+
             CancelInteraction();
             _viewModel.ClearSelection();
             e.Handled = true;
@@ -5177,6 +5533,7 @@ public sealed partial class MainWindow : Window
         Marquee,
         Shape,
         Pencil,
+        PolygonVertex,
     }
 }
 

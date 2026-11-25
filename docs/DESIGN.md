@@ -1,7 +1,7 @@
 # MyDrawVector 系統設計文件
 
-- 文件版本：1.0
-- 對應軟體版本：1.6.12
+- 文件版本：1.1
+- 對應軟體版本：1.7.0
 - 文件性質：設計觀點與決策紀錄
 - 適用對象：維護者、貢獻者、功能規劃者
 
@@ -167,7 +167,8 @@ Document
 │   ├── ShapeObject
 │   ├── TextObject
 │   ├── ImageObject
-│   └── PathObject
+│   ├── PathObject
+│   └── PolygonObject
 └── Assets: List<AssetInfo>
 ```
 
@@ -177,7 +178,7 @@ Document
 | --- | --- | --- |
 | `id` | string | GUID `"N"` 格式 |
 | `name` | string | 顯示名稱 |
-| `type` | string | `shape`、`text`、`image`、`path` |
+| `type` | string | `shape`、`text`、`image`、`path`、`polygon` |
 | `layerId` | string | 所屬圖層 |
 | `zIndex` | int | 圖層內順序 |
 | `transform` | object | 中心、尺寸、旋轉、翻轉 |
@@ -228,6 +229,19 @@ Document
 | `stroke` | 線條顏色 |
 | `strokeWidth` | 線條粗細 |
 | `dash` | 線條樣式 |
+
+#### PolygonObject
+
+| 欄位 | 說明 |
+| --- | --- |
+| `vertices` | `PolygonVertex` 集合（`x`、`y` 為 0～1 正規化區域座標，`isSmooth` 決定尖角或平滑曲線） |
+| `fill` | 填色色碼 |
+| `stroke` | 邊框色碼 |
+| `strokeWidth` | 邊框粗細 |
+| `dash` | `solid`、`dash`、`dot` |
+| `isFilled` | 是否啟用填色 |
+| `isStroked` | 是否啟用邊框 |
+| `smoothness` | 0～1 曲線平滑度（預設 `0.5`，Catmull-Rom 轉 Cubic Bézier 係數為 `smoothness / 3`） |
 
 ### 6.4 設定結構
 
@@ -436,7 +450,7 @@ if assets 已存在 id → 重用
 ```text
 EditorTool = Select | Rectangle | RoundedRectangle | Ellipse | Line |
              Arrow | Triangle | Diamond | Pentagon | Hexagon | Star |
-             SpeechBubble | Text | Image | Pencil | Pan
+             SpeechBubble | Polygon | CurvedPolygon | Text | Image | Pencil | Pan
 ```
 
 ### 9.2 拖曳狀態
@@ -449,6 +463,7 @@ None ──► Rotate
 None ──► Marquee
 None ──► Shape
 None ──► Pencil
+None ──► PolygonVertex
 任何狀態 ──► None（放開、取消或捕捉遺失）
 ```
 

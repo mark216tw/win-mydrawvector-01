@@ -103,6 +103,12 @@
                 <DataTemplate x:Key="SpeechBubbleToolIconTemplate">
                     <FontIcon Glyph="&#xE8BD;" />
                 </DataTemplate>
+                <DataTemplate x:Key="PolygonToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 4,6 L 14,3 L 21,11 L 16,20 L 6,18 L 9,12 Z" />
+                </DataTemplate>
+                <DataTemplate x:Key="CurvedPolygonToolIconTemplate">
+                    <controls:ToolPathIcon Data="M 6,6 C 11,1 20,3 20,10 C 20,17 15,21 9,20 C 3,19 1,11 6,6 Z" />
+                </DataTemplate>
                 <DataTemplate x:Key="ObjectRowTemplate">
                     <Grid Padding="0,2" ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
@@ -289,6 +295,7 @@
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
                                             <ToggleButton x:Uid="RoundedRectangleToolButton" x:Name="RoundedRectangleToolButton" Grid.Row="0" Grid.Column="0" Tag="RoundedRectangle" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="圓角矩形" AutomationProperties.Name="圓角矩形工具" />
                                             <ToggleButton x:Uid="ArrowToolButton" x:Name="ArrowToolButton" Grid.Row="0" Grid.Column="1" Tag="Arrow" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="箭頭" AutomationProperties.Name="箭頭工具" />
@@ -298,6 +305,8 @@
                                             <ToggleButton x:Uid="HexagonToolButton" x:Name="HexagonToolButton" Grid.Row="1" Grid.Column="1" Tag="Hexagon" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="六邊形" AutomationProperties.Name="六邊形工具" />
                                             <ToggleButton x:Uid="StarToolButton" x:Name="StarToolButton" Grid.Row="1" Grid.Column="2" Tag="Star" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="星形" AutomationProperties.Name="星形工具" />
                                             <ToggleButton x:Uid="SpeechBubbleToolButton" x:Name="SpeechBubbleToolButton" Grid.Row="1" Grid.Column="3" Tag="SpeechBubble" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="對話框" AutomationProperties.Name="對話框工具" />
+                                            <ToggleButton x:Uid="PolygonToolButton" x:Name="PolygonToolButton" Grid.Row="2" Grid.Column="0" Tag="Polygon" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="直線多邊形" AutomationProperties.Name="直線多邊形工具" />
+                                            <ToggleButton x:Uid="CurvedPolygonToolButton" x:Name="CurvedPolygonToolButton" Grid.Row="2" Grid.Column="1" Tag="CurvedPolygon" Click="ToolButton_Click" Style="{StaticResource ToolButtonStyle}" ToolTipService.ToolTip="曲線多邊形" AutomationProperties.Name="曲線多邊形工具" />
                                         </Grid>
                                     </Flyout>
                                 </FlyoutBase.AttachedFlyout>
@@ -586,6 +595,71 @@
                                         </ComboBox>
                                         <controls:NumericField x:Name="StrokeWidthBox" Header="邊框粗細" Minimum="0" Maximum="50" ValueChanged="StrokeWidthBox_ValueChanged" />
                                         <controls:NumericField x:Name="CornerRadiusBox" Header="圓角" Minimum="0" Maximum="500" ValueChanged="CornerRadiusBox_ValueChanged" />
+                                        <StackPanel x:Name="PolygonEditPanel" Spacing="8" Visibility="Collapsed">
+                                            <Border Height="1" Margin="0,4" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                                            <TextBlock x:Uid="PolygonSectionHeader" FontWeight="SemiBold" Text="多邊形塑形" />
+                                            <ToggleButton
+                                                x:Uid="EditVerticesToggle"
+                                                x:Name="EditVerticesToggle"
+                                                Click="EditVerticesToggle_Click"
+                                                Content="編輯頂點"
+                                                HorizontalAlignment="Stretch"
+                                                Style="{StaticResource CommandToggleButtonStyle}" />
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Button
+                                                    x:Uid="ConvertAllStraightButton"
+                                                    x:Name="ConvertAllStraightButton"
+                                                    Click="ConvertAllStraight_Click"
+                                                    Content="全部轉直線"
+                                                    Style="{StaticResource CommandButtonStyle}" />
+                                                <Button
+                                                    x:Uid="ConvertAllCurvedButton"
+                                                    x:Name="ConvertAllCurvedButton"
+                                                    Click="ConvertAllCurved_Click"
+                                                    Content="全部轉曲線"
+                                                    Style="{StaticResource CommandButtonStyle}" />
+                                            </StackPanel>
+                                            <StackPanel Spacing="4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock
+                                                        x:Uid="PolygonSmoothnessLabel"
+                                                        VerticalAlignment="Center"
+                                                        Text="曲線平滑度" />
+                                                    <TextBlock
+                                                        x:Name="PolygonSmoothnessValueText"
+                                                        Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                        Text="50%" />
+                                                </Grid>
+                                                <Slider
+                                                    x:Name="PolygonSmoothnessSlider"
+                                                    AutomationProperties.Name="曲線平滑度"
+                                                    Minimum="0"
+                                                    Maximum="100"
+                                                    StepFrequency="1"
+                                                    Value="50"
+                                                    ValueChanged="PolygonSmoothnessSlider_ValueChanged"
+                                                    PointerCaptureLost="PolygonSmoothnessSlider_PointerCaptureLost" />
+                                                <controls:NumericField
+                                                    x:Name="PolygonSmoothnessBox"
+                                                    Header="平滑度 (%)"
+                                                    Minimum="0"
+                                                    Maximum="100"
+                                                    ValueChanged="PolygonSmoothnessBox_ValueChanged" />
+                                            </StackPanel>
+                                            <TextBlock
+                                                x:Uid="PolygonEditHint"
+                                                x:Name="PolygonEditHint"
+                                                FontSize="12"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="雙擊圖形進入編輯：拖曳頂點塑形、點擊邊線加點、雙擊頂點切換尖角／平滑、右鍵或 Delete 刪點。"
+                                                TextWrapping="Wrap" />
+                                        </StackPanel>
                                     </StackPanel>
 
                                     <StackPanel x:Name="PencilSection" Spacing="8" Visibility="Collapsed">

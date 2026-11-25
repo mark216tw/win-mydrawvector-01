@@ -63,6 +63,16 @@
   <data name="StarToolButton.AutomationProperties.Name" xml:space="preserve"><value>星形工具</value></data>
   <data name="SpeechBubbleToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>對話框</value></data>
   <data name="SpeechBubbleToolButton.AutomationProperties.Name" xml:space="preserve"><value>對話框工具</value></data>
+  <data name="PolygonToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>直線多邊形</value></data>
+  <data name="PolygonToolButton.AutomationProperties.Name" xml:space="preserve"><value>直線多邊形工具</value></data>
+  <data name="CurvedPolygonToolButton.ToolTipService.ToolTip" xml:space="preserve"><value>曲線多邊形</value></data>
+  <data name="CurvedPolygonToolButton.AutomationProperties.Name" xml:space="preserve"><value>曲線多邊形工具</value></data>
+  <data name="PolygonSectionHeader.Text" xml:space="preserve"><value>多邊形塑形</value></data>
+  <data name="EditVerticesToggle.Content" xml:space="preserve"><value>編輯頂點</value></data>
+  <data name="ConvertAllStraightButton.Content" xml:space="preserve"><value>全部轉直線</value></data>
+  <data name="ConvertAllCurvedButton.Content" xml:space="preserve"><value>全部轉曲線</value></data>
+  <data name="PolygonSmoothnessLabel.Text" xml:space="preserve"><value>曲線平滑度</value></data>
+  <data name="PolygonEditHint.Text" xml:space="preserve"><value>雙擊圖形進入編輯：拖曳頂點塑形、點擊邊線加點、雙擊頂點切換尖角／平滑、右鍵或 Delete 刪點。</value></data>
   <data name="PreferencesThemeHeader" xml:space="preserve"><value>顯示模式</value></data>
   <data name="ThemeSystem" xml:space="preserve"><value>跟隨系統</value></data>
   <data name="ThemeLight" xml:space="preserve"><value>淺色</value></data>

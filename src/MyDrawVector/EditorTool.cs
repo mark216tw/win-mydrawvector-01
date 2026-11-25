@@ -14,6 +14,8 @@ public enum EditorTool
     Hexagon,
     Star,
     SpeechBubble,
+    Polygon,
+    CurvedPolygon,
     Text,
     Image,
     Pencil,

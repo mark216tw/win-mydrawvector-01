@@ -8,6 +8,7 @@ namespace MyDrawVector.Core.Models;
 [JsonDerivedType(typeof(TextObject), "text")]
 [JsonDerivedType(typeof(ImageObject), "image")]
 [JsonDerivedType(typeof(PathObject), "path")]
+[JsonDerivedType(typeof(PolygonObject), "polygon")]
 public abstract class SceneObject
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");

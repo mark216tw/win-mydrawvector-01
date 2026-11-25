@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-11-25 - v1.7.0
+
+### 目標
+畫圖工具新增「直線多邊形」與「曲線多邊形」及其頂點塑形編輯模式，讓使用者能自由建立並微調所需形狀。
+
+### 變更
+- `src/MyDrawVector.Core/Models/PolygonVertex.cs`、`PolygonObject.cs`、`SceneObject.cs`：新增封閉多邊形模型（`type: "polygon"`），每個頂點獨立記錄 `IsSmooth`（尖角／平滑），支援 `Smoothness`（0–1 曲率張力）並保持舊 `.mydraw` 檔案相容。
+- `src/MyDrawVector.Core/Geometry/PolygonGeometry.cs`：實作封閉 Catmull-Rom 轉 Cubic Bézier 曲線段產生、折線展平與點內／邊線命中測試，以及在旋轉與翻轉狀態下保持未移動頂點世界座標不漂移的 `ApplyWorldVertices`。
+- `src/MyDrawVector/EditorTool.cs`、`MainWindow.xaml`、`Strings/zh-Hant/Resources.resw`：於「更多圖形」選單新增直線多邊形與曲線多邊形工具（4×3 排列），右側屬性面板與圖形共用填色／邊框／粗細／虛線，並新增「編輯頂點」、「全部轉直線／全部轉曲線」與「曲線平滑度」滑桿／數值控制。
+- `src/MyDrawVector/MainWindow.Polygon.cs`、`MainWindow.xaml.cs`：實作逐點繪製（即時封閉預覽、起點吸附、Shift 45°、格線吸附、雙擊／Enter 完成並自動切回選取工具、右鍵／Backspace 退回、Esc 取消）與完整頂點編輯（雙擊進入、拖曳頂點、點擊邊線插點、雙擊頂點切換尖角／平滑、右鍵或 Delete 刪點、Undo／Redo）。
+- `tests/MyDrawVector.Core.Tests/PolygonTests.cs`：新增序列化、旋轉翻轉無漂移、混合尖角／平滑曲線、填色／無填色命中測試與深層複製單元測試。
+- `Directory.Build.props`、`src/MyDrawVector/app.manifest`：版本更新為 1.7.0。
+- `README.md`、`CHANGELOG.md`、`RELEASE_NOTES.md`、`docs/USER_GUIDE.md`、`docs/FEATURE_SPEC.md`、`docs/ARCHITECTURE.md`、`docs/DESIGN.md`：同步更新 v1.7.0 直線／曲線多邊形與頂點塑形功能說明、資料結構與狀態機文件。
+
+### 問題與解法
+- 旋轉或翻轉後編輯單一頂點若直接以局部邊界重算，會造成未移動頂點偏移；改以反旋轉縮放矩陣將所有頂點世界座標投影至未平移局部空間重算中心與尺寸，確保未動頂點零漂移。
+- 雙擊完成多邊形前會先觸發兩次 `PointerPressed`；加入近距重複點擊過濾避免尾端多出重合頂點。
+
+### 待辦
+- 實機啟動 UI 互動與高 DPI 驗證。
+
+### 發佈
+- `dotnet build`／`dotnet test` 通過（41 項測試）。
+- x64 與 ARM64 非 self-contained publish 成功，PE 架構確認無誤，建立含 `使用指南.txt` 的可攜式 zip 並發佈至 GitHub Release `v1.7.0`。
+
+---
+
 ## 2026-11-11 - v1.6.12
 
 ### 目標

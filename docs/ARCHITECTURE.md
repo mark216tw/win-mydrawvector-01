@@ -1,7 +1,7 @@
 # MyDrawVector 系統架構與技術文件
 
-- 文件版本：1.0
-- 對應軟體版本：1.6.12
+- 文件版本：1.1
+- 對應軟體版本：1.7.0
 - 文件性質：現況架構說明（As-Is Architecture）
 - 適用對象：維護者、貢獻者、技術審查者
 
@@ -78,6 +78,7 @@ MyDrawVector.slnx
 ├── src/MyDrawVector/               net10.0-windows，WinUI 3
 │   ├── App.xaml / App.xaml.cs      啟動、單一實例、DI、日誌
 │   ├── MainWindow.xaml / .cs       主視窗、渲染、輸入、屬性面板
+│   ├── MainWindow.Polygon.cs       多邊形逐點繪製與頂點編輯互動
 │   ├── CanvasHostControl.cs        工作區裁切與游標
 │   ├── EditorTool.cs               工具列舉
 │   ├── ViewModels/                 EditorViewModel
@@ -237,8 +238,11 @@ AppWindow.Closing
 | `ShapeObject` | `Core/Models/ShapeObject.cs` | 幾何圖形與樣式 |
 | `TextObject` | `Core/Models/TextObject.cs` | 文字內容與字型樣式 |
 | `PathObject` | `Core/Models/PathObject.cs` | 自由筆畫正規化點與線段命中 |
+| `PolygonObject` | `Core/Models/PolygonObject.cs` | 封閉直線／曲線多邊形、平滑度與填色／邊線命中 |
+| `PolygonVertex` | `Core/Models/PolygonVertex.cs` | 多邊形正規化頂點座標與尖角／平滑旗標 |
 | `ImageObject` | `Core/Models/ImageObject.cs` | 圖片資產參照 |
 | `ObjectTransform` | `Core/Geometry/ObjectTransform.cs` | 中心、尺寸、旋轉、翻轉、矩陣 |
+| `PolygonGeometry` | `Core/Geometry/PolygonGeometry.cs` | Catmull-Rom 轉貝茲段、邊線命中與無漂移正規化 |
 | `GridSnap` | `Core/Geometry/GridSnap.cs` | 格線吸附計算 |
 | `RectD` | `Core/Geometry/RectD.cs` | 矩形值型別 |
 | `UndoManager` | `Core/History/UndoManager.cs` | 快照式復原與合併 |
@@ -276,7 +280,8 @@ SceneObject (abstract)
 ├── ShapeObject      矩形、圓角矩形、橢圓、直線、箭頭、多邊形、星形、對話框
 ├── TextObject       文字、字型、字重、對齊、行距
 ├── ImageObject      資產 ID
-└── PathObject       自由筆畫正規化點
+├── PathObject       自由筆畫正規化點
+└── PolygonObject    封閉多邊形頂點（尖角／平滑）與曲線平滑度
 ```
 
 `SceneObject` 共同欄位：
@@ -402,6 +407,7 @@ M = Translate(-Width/2, -Height/2)
 - `TextObject` → `TextBlock`
 - `ImageObject` → `Image`
 - `PathObject` → `Path`
+- `PolygonObject` → `Path`
 
 `RenderAll()` 會：
 
@@ -438,7 +444,7 @@ ViewMatrix = Scale(zoom) * Translate(pan)
 ### 10.1 拖曳模式
 
 ```text
-DragMode = None | Pan | Move | Resize | Rotate | Marquee | Shape | Pencil
+DragMode = None | Pan | Move | Resize | Rotate | Marquee | Shape | Pencil | PolygonVertex
 ```
 
 Pointer 事件集中由 `CanvasHost` 處理，物件視覺元素不參與命中測試。
@@ -514,7 +520,7 @@ assets/
 {
   "schema": "mydrawvector",
   "version": 2,
-  "appVersion": "1.6.12",
+  "appVersion": "1.7.0",
   "created": "2026-11-11T12:00:00+08:00",
   "modified": "2026-11-11T12:00:00+08:00"
 }

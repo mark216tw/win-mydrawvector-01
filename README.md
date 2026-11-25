@@ -26,7 +26,8 @@ MyDrawVector 是一套以文件為中心、完全離線的向量繪圖工具。�
 
 ### 圖形與樣式
 
-- 矩形、圓角矩形、橢圓、直線、箭頭、三角形、菱形、五邊形、六邊形、星形、對話框。
+- 矩形、圓角矩形、橢圓、直線、箭頭、三角形、菱形、五邊形、六邊形、星形、對話框、直線多邊形、曲線多邊形。
+- 直線／曲線多邊形支援逐點繪製、即時封閉預覽與頂點編輯模式（拖曳頂點、點擊邊線加點、雙擊頂點切換尖角／平滑、右鍵或 `Delete` 刪點、全部轉直線／曲線、0–100% 曲線平滑度調整）。
 - 20 色快速填色與邊框色盤、自訂顏色、透明度、粗細、虛線／點線、圓角。
 - 「啟用填色」與「啟用邊框」開關。
 - 每個圖形工具分別記住上次使用的樣式。
@@ -70,8 +71,8 @@ MyDrawVector 是一套以文件為中心、完全離線的向量繪圖工具。�
 ## 下載與執行
 
 1. 前往 [Releases](https://github.com/mark216tw/win-mydrawvector-01/releases/latest) 下載：
-   - `MyDrawVector-1.6.12-portable-win-x64.zip`
-   - `MyDrawVector-1.6.12-portable-win-arm64.zip`
+   - `MyDrawVector-1.7.0-portable-win-x64.zip`
+   - `MyDrawVector-1.7.0-portable-win-arm64.zip`
 2. 解壓縮到任意資料夾。
 3. 安裝對應架構的 .NET 10 Desktop Runtime 與 Windows App SDK 2.6.5 Runtime。
 4. 執行資料夾內的 `MyDrawVector.exe`。
